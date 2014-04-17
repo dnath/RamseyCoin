@@ -1,0 +1,5 @@
+# python bytecode
+*.pyc
+
+# misc
+*.history
