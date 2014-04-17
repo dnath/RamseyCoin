@@ -34,4 +34,4 @@ dllist.o: dllist.c dllist.h jval.h
 	$(COMPILE) ${INCLUDES} -c dllist.c
 
 clean:
-	rm -f *.o core
+	rm -f *.o core $(PROGRAMS)
