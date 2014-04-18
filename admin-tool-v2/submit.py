@@ -20,7 +20,13 @@ settings_file = open(settings_file_name, 'r')
 settings = yaml.load(settings_file)
 settings_file.close()
 
+# skip = 1000
+count = -1
 for line in f:
+	count += 1
+	print 'count =', count
+	# if count < skip:
+	#	continue
 	fw_name = filename + str(count) + '.txt'
 	fw = open(fw_name, 'w')
 	fw.write(line)
