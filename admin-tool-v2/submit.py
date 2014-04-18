@@ -21,7 +21,7 @@ for line in f:
 	fw.close()
 	
 	mod_vault_handler = mod_vault.get_module_handler(settings)
-	mod_vault_handler.handle_command(['get', fw_name])
+	mod_vault_handler.handle_command(['mint', fw_name])
 	time.sleep(4)
 	
 	
