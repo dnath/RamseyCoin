@@ -9,9 +9,7 @@ filename = 'solution.txt'
 if len(sys.argv) == 2:        
      filename = sys.argv[1]
 
-
 f = open(filename)
-count = 0
 
 settings_file_name = 'settings.yaml'
 # if len(sys.argv) == 2:        
@@ -27,7 +25,7 @@ for line in f:
 	print 'count =', count
 	# if count < skip:
 	#	continue
-	fw_name = filename + str(count) + '.txt'
+	fw_name = filename + '_sol.txt'
 	fw = open(fw_name, 'w')
 	fw.write(line)
 	fw.close()
