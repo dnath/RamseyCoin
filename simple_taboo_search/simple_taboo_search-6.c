@@ -246,7 +246,7 @@ main(int argc,char *argv[])
 // generate counter examples of size n-1
 void generate_counter_example(int * g, int gsize)
 {
-	if(gsize<=79)
+	if(gsize<=80)
 	{
 		return;
 	}
@@ -261,8 +261,8 @@ void generate_counter_example(int * g, int gsize)
 		   //PrintGraph(g,gsize);
 		   //get all counter examples of size n-1
 		   // current_node to be deleted from the original graph
-		   int current_node = 0;
-		   for(current_node = 0; current_node<gsize;current_node ++)
+		   int current_node = gsize - 1;
+		   for(current_node = gsize - 1; current_node >= 0; --current_node)
 		   {
 		   		int *  new_graph = (int *)malloc((gsize-1)*(gsize-1)*sizeof(int));
 				if(new_graph == NULL) {
