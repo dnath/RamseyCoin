@@ -65,12 +65,13 @@ void PrintGraph(int *g, int gsize)
 {
 	int i;
 	int j;
-	char number[10] ;
-	sprintf(number,"%d",gsize);
 	char fileName[80];
-	strcat (fileName,"myfileAll");
-	strcat(fileName, number);
-	strcat(fileName, ".txt");
+	memset(fileName, 0, 80*sizeof(char));
+	sprintf(fileName,"myFile_%d.txt", gsize);
+	// char fileName[80];
+	// strcat (fileName,"myfileAll");
+	// strcat(fileName, number);
+	// strcat(fileName, ".txt");
 	FILE * pFile = fopen (fileName,"a");
 	for(i=0; i < gsize; i++)
 	{
