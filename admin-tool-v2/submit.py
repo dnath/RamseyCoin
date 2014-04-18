@@ -30,9 +30,12 @@ for line in f:
 	fw.write(line)
 	fw.close()
 	
-	mod_vault_handler = mod_vault.get_module_handler(settings)
-	mod_vault_handler.handle_command(['mint', fw_name])
-	time.sleep(4)
+	ret = mod_vault_handler = mod_vault.get_module_handler(settings)
+	while ret is not True:
+		print 'Attempt failed !'
+		ret = mod_vault_handler.handle_command(['mint', fw_name])
+		time.sleep(3)		
+	time.sleep(3)
 	
 f.close()
 	

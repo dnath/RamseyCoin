@@ -23,8 +23,8 @@ class VaultModuleHandler(ModuleHandler):
             if len(command) != 2:
                 print "Invalid call to the 'mint' command. Call must be of the form: 'mint <file>'."
             else:
-                self.__mint_coin(command[1])
-            return True
+                return self.__mint_coin(command[1])
+            return False # True
         return False
 
     def list_commands(self):
@@ -88,13 +88,13 @@ class VaultModuleHandler(ModuleHandler):
         except Exception as ex:
             print 'Error while reading from file: {0}'.format(file_path)
             print '{0}'.format(ex)
-            return
+            return False
 
         solution = ""
         for ch in content:
             if ch != '0' and ch != '1' and not ch.isspace():
                 print "Invalid character '{0}' in solution file. Only 0's, 1's and whitespaces are allowed.".format(ch)
-                return
+                return False
             if ch == '0' or ch == '1':
                 solution += ch
 
@@ -109,6 +109,8 @@ class VaultModuleHandler(ModuleHandler):
             print table
             print 'Solution candidate submitted successfully.'
             print
+	    return True
+	return False
 
     def __get_coin_table(self, detailed=False):
         fields = ["Coin ID", "User", "Application", "Timestamp", "Status", "Size"]
