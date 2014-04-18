@@ -1,8 +1,14 @@
+#! /usr/bin/python
+
 import os
 import mod_vault
 import time
+import yaml
 
-filenname = 'solution.txt'
+filename = 'solution.txt'
+if len(sys.argv) == 2:        
+     filename = sys.argv[1]
+
 
 f = open(filename)
 count = 0
@@ -23,6 +29,8 @@ for line in f:
 	mod_vault_handler = mod_vault.get_module_handler(settings)
 	mod_vault_handler.handle_command(['mint', fw_name])
 	time.sleep(4)
+	
+f.close()
 	
 	
 	
