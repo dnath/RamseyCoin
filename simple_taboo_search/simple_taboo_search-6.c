@@ -246,7 +246,7 @@ main(int argc,char *argv[])
 // generate counter examples of size n-1
 void generate_counter_example(int * g, int gsize)
 {
-	if(gsize<=99)
+	if(gsize<=79)
 	{
 		return;
 	}
