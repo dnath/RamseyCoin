@@ -28,6 +28,8 @@
  * prints in the right format for the read routine
  */
 
+void generate_counter_example(int * g, int gsize);
+
 int maximumGraphSize = 101;
 
 int edgeWeight [101];
@@ -63,8 +65,13 @@ void PrintGraph(int *g, int gsize)
 {
 	int i;
 	int j;
-
-	FILE * pFile = fopen ("myfileAll.txt","a");
+	char number[10] ;
+	sprintf(number,"%d",gsize);
+	char fileName[80];
+	strcat (fileName,"myfileAll");
+	strcat(fileName, number);
+	strcat(fileName, ".txt");
+	FILE * pFile = fopen (fileName,"a");
 	for(i=0; i < gsize; i++)
 	{
 		for(j=0; j < gsize; j++)
@@ -238,7 +245,7 @@ main(int argc,char *argv[])
 // generate counter examples of size n-1
 void generate_counter_example(int * g, int gsize)
 {
-	if(gsize<=79)
+	if(gsize<=99)
 	{
 		return;
 	}
@@ -249,7 +256,8 @@ void generate_counter_example(int * g, int gsize)
 
 		if(count == 0)
 		{
-		   PrintGraph(g,gsize);
+			printf("%d\n", count );
+		   //PrintGraph(g,gsize);
 		   //get all counter examples of size n-1
 		   // current_node to be deleted from the original graph
 		   int current_node = 0;
