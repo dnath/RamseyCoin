@@ -1,0 +1,4 @@
+tabu_search
+*.o
+*.in
+*.out
