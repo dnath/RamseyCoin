@@ -6,6 +6,7 @@
 
 #include "fifo.h"	/* for taboo list */
 
+#define MAXCOUNT 300000 // = 10 GB
 
 #define MAXSIZE (512)
 
@@ -29,6 +30,10 @@
  */
 
 void generate_counter_example(int * g, int gsize);
+
+int req_size  = 86; // required lowest size
+
+int global_count = 0;
 
 int maximumGraphSize = 101;
 
@@ -65,6 +70,15 @@ void PrintGraph(int *g, int gsize)
 {
 	int i;
 	int j;
+	
+	if (gsize == req_size) {
+                global_count++;
+                if (global_count > MAX_COUNT) {
+                        printf("Stopping as gsize = %d global_count = %d\n", gsize, global_count);
+                        exit(0);
+                }
+        }
+	
 	char fileName[80];
 	memset(fileName, 0, 80*sizeof(char));
 	sprintf(fileName,"myFile_%d.txt", gsize);
