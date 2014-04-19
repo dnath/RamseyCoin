@@ -260,7 +260,7 @@ main(int argc,char *argv[])
 // generate counter examples of size n-1
 void generate_counter_example(int * g, int gsize)
 {
-	if(gsize<=80)
+	if(gsize <= req_size)
 	{
 		return;
 	}
