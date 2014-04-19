@@ -135,13 +135,27 @@ int naive_clique_count6(const ELEM_TYPE *graph, const int size)
 	for (i=0; i<size-5; i++) {
 		for (j=i+1; j<size-4; j++) {
 			for (k=j+1; k<size-3; k++) { 
-				if ((graph[i*size+j] == graph[i*size+k]) && (graph[i*size+j] == graph[j*size+k])) {
+				if (
+					(graph[i*size+j] == graph[i*size+k]) &&
+					(graph[i*size+j] == graph[j*size+k])) {
 					for (l=k+1; l<size-2; l++) { 
-						if ((graph[i*size+j] == graph[i*size+l]) && (graph[i*size+j] == graph[j*size+l]) && (graph[i*size+j] == graph[k*size+l])) {
+						if (
+							(graph[i*size+j] == graph[i*size+l]) &&
+							(graph[i*size+j] == graph[j*size+l]) &&
+							(graph[i*size+j] == graph[k*size+l])) {
 							for (m=l+1; m<size-1; m++) {
-								if ((graph[i*size+j] == graph[i*size+m]) && (graph[i*size+j] == graph[j*size+m]) && (graph[i*size+j] == graph[k*size+m]) && (graph[i*size+j] == graph[l*size+m])) {
+								if (
+									(graph[i*size+j] == graph[i*size+m]) &&
+									(graph[i*size+j] == graph[j*size+m]) &&
+									(graph[i*size+j] == graph[k*size+m]) &&
+									(graph[i*size+j] == graph[l*size+m])) {
 									for (n=m+1; n<size;n++) {
-										if ((graph[i*size+j] == graph[i*size+n]) && (graph[i*size+j] == graph[j*size+n]) && (graph[i*size+j] == graph[k*size+n]) && (graph[i*size+j] == graph[l*size+n]) && (graph[i*size+j] == graph[m*size+n])) {
+										if (
+											(graph[i*size+j] == graph[i*size+n]) &&
+											(graph[i*size+j] == graph[j*size+n]) &&
+											(graph[i*size+j] == graph[k*size+n]) &&
+											(graph[i*size+j] == graph[l*size+n]) &&
+											(graph[i*size+j] == graph[m*size+n])) {
 											count++;
 										}
 									}
