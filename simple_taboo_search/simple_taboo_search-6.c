@@ -6,7 +6,7 @@
 
 #include "fifo.h"	/* for taboo list */
 
-#define MAXCOUNT 300000 // = 10 GB
+#define MAX_COUNT 300000 // = 10 GB
 
 #define MAXSIZE (512)
 
