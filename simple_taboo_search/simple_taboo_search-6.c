@@ -219,7 +219,7 @@ main(int argc,char *argv[])
    FILE * pFile;
    char graph_size [10];
    char mystring [10202];
-   pFile = fopen ("example.txt" , "r");
+   pFile = fopen ("example.solution" , "r");
    if (pFile == NULL) perror ("Error opening file");
    else {
      if(fgets(graph_size,10,pFile)!=NULL)
