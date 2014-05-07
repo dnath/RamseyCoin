@@ -1,0 +1,39 @@
+# isomprphism checker for CS290B
+#
+# isomprph.c 	: routines to check two graphs based on incident edges of
+#              	  a specific color
+# iso_check.c	: routine that reads two graphs in and calls isomorph checking
+#                 functions from isomorph.c
+# jrb.[ch]	: red-black tree implementation due to Jim Plank
+#		  http://web.eecs.utk.edu/~plank/
+# jval.[ch]	: generic C types used by jrb.[ch]
+#
+# to run
+#	iso_check -f file1 -g file2
+# where
+#	file1 and file2 contain adjacency matricies and a dimension
+#
+# adjacency input file format is size and a second int (which is ignored) on
+# the first line followed by lines of 0s and 1s, each indicating the colors of 
+# edges between the nodes denoted by the matrix subscripts.  Only the upper
+# triangle is recognized
+#
+# for example
+#	10 0
+#	0 0 1 1 1 0 1 1 0 0
+#	0 0 0 1 0 1 1 1 0 1
+#	0 0 0 0 1 1 0 1 1 0
+#	0 0 0 0 1 0 1 0 1 1
+#	0 0 0 0 0 0 1 1 1 1
+#	0 0 0 0 0 0 0 1 0 0
+#	0 0 0 0 0 0 0 1 1 0
+#	0 0 0 0 0 0 0 0 0 1
+# 	0 0 0 0 0 0 0 0 0 1
+#	0 0 0 0 0 0 0 0 0 0
+#
+# if a valid input file on 10 nodes.  Note that the spaces and line breaks are
+# necessary
+#
+# the three test files
+# test.state is an isomorph with test1.state
+# test.state is not an isomorph with test2.state
