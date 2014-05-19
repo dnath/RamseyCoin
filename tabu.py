@@ -9,7 +9,7 @@
 DEBUG = True
 DEBUG = False
 
-import sys, pickle, time, OrderedSet
+import sys, pickle, time, OrderedSet, random
 
 #
 # debug
@@ -122,24 +122,23 @@ def vert0CliqueCount(graph):
 # Output: count, and flipped edge
 #
 def findLocalMinRand(tabuList, graph, failCount=999999):
-    debug("Entering findLocalMin()")
     bestCount = failCount
+
+    randomEdges = range(1, len(graph))
+    random.shuffle(randomEdges)
 
     # Iterate over the new edges
     i = 0
-    randEdges = range(len(graph))
-    random.shuffle(randEdges)
-    for j in randEdges:
-        # Flip a random edge
+    for j in randomEdges[:len(graph)/2]:
+        # Flip an edge
         graph[i][j] = 1 - graph[i][j]
 
         # Check the result of the flip
         cliqueCount = vert0CliqueCount(graph)
-        debug(">   local cliqueCount: %d" % (cliqueCount))
+        #print "count: %d, best: %d, i: %d, j: %d" % (cliqueCount, bestCount, i, j)
 
         # This was a good flip
         if cliqueCount < bestCount and not (i, j) in tabuList:
-            debug(">   Updating bestCount")
             bestCount = cliqueCount
             bestI = i
             bestJ = j
@@ -147,7 +146,6 @@ def findLocalMinRand(tabuList, graph, failCount=999999):
         # Unfilp the edge
         graph[i][j] = 1 - graph[i][j]
 
-    debug("Leaving findLocalMin()")
 
     if bestCount == failCount:
         return ()
@@ -248,7 +246,8 @@ def tabu(graph, tabuSize, failCount=999999, maxSize=101):
             continue
 
         # Keep looking
-        best = findLocalMinIter(tabuList, graph)
+        # best = findLocalMinIter(tabuList, graph)
+        best = findLocalMinRand(tabuList, graph)
 
         # Could not find couterexample
         if len(best) == 0:
@@ -260,18 +259,18 @@ def tabu(graph, tabuSize, failCount=999999, maxSize=101):
         bestJ = best[2]
 
         # Keep the best edge-flip
-        debug("Flipping (%d, %d)" % (bestI, bestJ))
         graph[bestI][bestJ] = 1 - graph[bestI][bestJ]
 
         # Update the clique-count
-        cliqueCount = naiveCliqueCount(graph)
+        # cliqueCount = naiveCliqueCount(graph)
+        cliqueCount = bestCount
 
         # Taboo this edge
         if len(tabuList) >= tabuSize:
             tabuList.pop(False)
         tabuList.add((bestI, bestJ))
 
-        print "[%d] Flipping (%d, %d), clique count: %d, taboo size: %d" % (len(graph), bestI, bestJ, bestCount, tabuSize)
+        print "[%d] Flipping (%d, %d), clique count: %d, taboo size: %d" % (len(graph), bestI, bestJ, cliqueCount, tabuSize)
 
 testGraph1 = \
         [[ 0, 0, 1, 0, 1, 0, 1, 0 ],
