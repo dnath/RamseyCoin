@@ -301,10 +301,11 @@ main(int argc, char *argv[])
 				exit(1);
 			}
 
-			fprintf(stdout, "Found counter example!\n");
-			fprintf(stdout, "Time elapsed since start: %f, since last CE: %f\n",
-					(double)(clock_found_ce-clock_start)/CLOCKS_PER_SEC,
-					(double)(clock_found_ce-clock_last_ce)/CLOCKS_PER_SEC);;
+			fprintf(stdout, "Found counterexample!\n");
+			fprintf(stdout, "Time elapsed since start: %f\n",
+					(double)(clock_found_ce-clock_start)/CLOCKS_PER_SEC);
+			fprintf(stdout, "Time elapsed since last counterexample: %f\n",
+					(double)(clock_found_ce-clock_last_ce)/CLOCKS_PER_SEC);
 
 			clock_last_ce = clock_found_ce;
 
@@ -354,6 +355,7 @@ main(int argc, char *argv[])
 
 			/* check the result of the flip */
 			count = vert0_clique_count6(graph, size, NULL);
+			//printf("count: %d, best: %d, i: %d, j: %d\n", count, best_count, i, j);
 
 			/* update the taboo list if this is locally optimal */
 			if ((count < best_count) && !FIFOFindEdge(taboo_list, i, j)) {
