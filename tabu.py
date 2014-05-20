@@ -9,6 +9,15 @@
 # Authors: Daniel Kudrow, Dev Nath, Victor Zakhary
 #
 ######################################################################
+#
+# Graphs are 2d Python lists. The tabu search is invoked with the
+# tabu() function. It takes two arguments:
+# 1. graph
+# 2. number of workers (how much to divide the search space)
+# The tabu list is set to the number of vertices in the graph and is
+# increased as necessary.
+#
+######################################################################
 
 
 ######################################################################
@@ -27,23 +36,15 @@ import time
 
 ######################################################################
 #
-# Parameters
-#
-DEBUG = True
-DEBUG = False
-#
-######################################################################
-
-
-######################################################################
-#
 # debug
 #
 # Toggle debugging output
 #
+DEBUG = False
+DEBUG = True
 def debug(msg):
     if DEBUG:
-        print "DEBUG: %s" % (msg)
+        sys.stdout.write(msg)
 #
 ######################################################################
 
@@ -166,15 +167,17 @@ def vert0CliqueCount(graph):
 # Input: graph
 # Output: count, and flipped edge
 #
-def findLocalMinRand(tabuList, graph, failCount=999999):
+def findLocalMinRand(tabuList, graph, numWorkers, failCount=999999):
     bestCount = failCount
 
+    # Prep search space
     randomEdges = range(1, len(graph))
     random.shuffle(randomEdges)
+    numWorkers = min(len(graph), numWorkers)
 
     # Iterate over the new edges
     i = 0
-    for j in randomEdges[:len(graph)/2]:
+    for j in randomEdges[:len(graph)/numWorkers]:
         # Flip an edge
         graph[i][j] = 1 - graph[i][j]
 
@@ -242,14 +245,15 @@ def findLocalMinIter(tabuList, graph, failCount=999999):
 # tabu
 #
 # tabu search
-# Input: graph, max graph size
+# Input: graph, number of worker nodes
 # Output: 
 #
-def tabu(seed, tabuSize, maxSize=101):
+def tabu(seed, numWorkers=1, maxSize=101):
 
     # Initialize the search space
     graph = copy.deepcopy(seed)
     cliqueCount = naiveCliqueCount(graph)
+    tabuSize = len(graph)
 
     # Make sure the seed is valid
     if cliqueCount != 0:
@@ -272,6 +276,8 @@ def tabu(seed, tabuSize, maxSize=101):
             # Timestamp solution
             clockFoundSolution = time.clock()
 
+            # TODO: Dispatch graph
+
             # This is the new seed
             seed = copy.deepcopy(graph)
 
@@ -280,9 +286,9 @@ def tabu(seed, tabuSize, maxSize=101):
                 print "Error: Discrepancy between naive and vert0 counts. Aborting."
                 sys.exit(1)
 
-            print "Found counterexample!"
-            print "Time elapsed since start: %f" % (clockFoundSolution-clockStart)
-            print "Time elapsed since last counterexample: %f" % (clockFoundSolution-clockLastSolution)
+            debug("Found counterexample!\n")
+            debug("Time elapsed since start: %f\n" % (clockFoundSolution-clockStart))
+            debug("Time elapsed since last counterexample: %f\n" % (clockFoundSolution-clockLastSolution))
 
             clockLastSolution = clockFoundSolution
 
@@ -302,19 +308,20 @@ def tabu(seed, tabuSize, maxSize=101):
 
             # Reset the tabu list
             tabuList.clear()
+            tabuSize = len(graph)
 
             continue
 
         # Keep looking
         #best = findLocalMinIter(tabuList, graph)
-        best = findLocalMinRand(tabuList, graph)
+        best = findLocalMinRand(tabuList, graph, numWorkers)
 
         # Could not find couterexample
         if len(best) == 0:
 
             # Try decreasing the tabu size
             if tabuSize >= 0:
-                print "Search failed, resetting tabuSize to %d." % (tabuSize - 1)
+                debug("Search failed, resetting tabuSize to %d." % (tabuSize - 1))
                 tabuSize = tabuSize - 1
                 graph = copy.deepcopy(seed)
                 cliqueCount = 0
@@ -323,7 +330,6 @@ def tabu(seed, tabuSize, maxSize=101):
             # Should never get here -- tabu size of zero should run forever...
             print "Could not find counterexample for size %d." % (len(graph))
             return
-
 
         # Results of local search
         bestCount = best[0]
@@ -337,14 +343,15 @@ def tabu(seed, tabuSize, maxSize=101):
         cliqueCount = bestCount
 
         # Taboo this edge
-        if len(tabuList) >= tabuSize:
-            tabuList.pop(False)
-        tabuList.add((bestI, bestJ))
+        if tabuSize != 0:
+            if len(tabuList) >= tabuSize:
+                tabuList.pop(False)
+            tabuList.add((bestI, bestJ))
 
-        sys.stdout.write("[%d] " % (len(graph)))
-        sys.stdout.write("Flipping (%d, %d), " % (bestI, bestJ))
-        sys.stdout.write("clique count: %d, " % (cliqueCount))
-        sys.stdout.write("taboo size: %d\n" % (tabuSize))
+        debug("[%d] " % (len(graph)))
+        debug("Flipping (%d, %d), " % (bestI, bestJ))
+        debug("clique count: %d, " % (cliqueCount))
+        debug("taboo size: %d\n" % (tabuSize))
 #
 ######################################################################
 
@@ -364,6 +371,6 @@ testGraph1 = \
          [ 0, 0, 0, 0, 0, 0, 0, 0 ]]
 
 
-tabu(testGraph1, 100)
+tabu(testGraph1, 10)
 #
 ######################################################################
