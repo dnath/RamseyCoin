@@ -1,16 +1,41 @@
 #!/usr/bin/python
 
+######################################################################
 #
 # tabu.py
 #
 # Tabu search for counterexamples to R(6, 6)
 #
+# Authors: Daniel Kudrow, Dev Nath, Victor Zakhary
+#
+######################################################################
 
+
+######################################################################
+#
+# Modules
+#
+import copy
+import OrderedSet
+import pickle
+import random
+import sys
+import time
+#
+######################################################################
+
+
+######################################################################
+#
+# Parameters
+#
 DEBUG = True
 DEBUG = False
+#
+######################################################################
 
-import sys, pickle, time, OrderedSet, random
 
+######################################################################
 #
 # debug
 #
@@ -19,7 +44,11 @@ import sys, pickle, time, OrderedSet, random
 def debug(msg):
     if DEBUG:
         print "DEBUG: %s" % (msg)
+#
+######################################################################
 
+
+######################################################################
 #
 # printGraph
 #
@@ -30,7 +59,11 @@ def printGraph(graph):
     print "Size: %d" % (len(graph))
     for row in graph:
         print row
+#
+######################################################################
 
+
+######################################################################
 #
 # readGraph
 # 
@@ -43,7 +76,11 @@ def readGraph(filename):
         return pickle.load(open(filename, "r"))
     except IOError:
         return []
+#
+######################################################################
 
+
+######################################################################
 #
 # naiveCliqueCount
 #
@@ -78,7 +115,11 @@ def naiveCliqueCount(graph):
                                             cliqueCount += 1
 
     return cliqueCount
+#
+######################################################################
 
+
+######################################################################
 #
 # vert0CliqueCount
 #
@@ -113,7 +154,11 @@ def vert0CliqueCount(graph):
                                         cliqueCount += 1
 
     return cliqueCount
+#
+######################################################################
 
+
+######################################################################
 #
 # findLocalMinRand
 #
@@ -135,7 +180,6 @@ def findLocalMinRand(tabuList, graph, failCount=999999):
 
         # Check the result of the flip
         cliqueCount = vert0CliqueCount(graph)
-        #print "count: %d, best: %d, i: %d, j: %d" % (cliqueCount, bestCount, i, j)
 
         # This was a good flip
         if cliqueCount < bestCount and not (i, j) in tabuList:
@@ -151,7 +195,11 @@ def findLocalMinRand(tabuList, graph, failCount=999999):
         return ()
 
     return (bestCount, bestI, bestJ)
+#
+######################################################################
 
+
+######################################################################
 #
 # findLocalMinIter
 #
@@ -170,7 +218,6 @@ def findLocalMinIter(tabuList, graph, failCount=999999):
 
         # Check the result of the flip
         cliqueCount = vert0CliqueCount(graph)
-        #print "count: %d, best: %d, i: %d, j: %d" % (cliqueCount, bestCount, i, j)
 
         # This was a good flip
         if cliqueCount < bestCount and not (i, j) in tabuList:
@@ -186,7 +233,11 @@ def findLocalMinIter(tabuList, graph, failCount=999999):
         return ()
 
     return (bestCount, bestI, bestJ)
+#
+######################################################################
 
+
+######################################################################
 #
 # tabu
 #
@@ -194,10 +245,16 @@ def findLocalMinIter(tabuList, graph, failCount=999999):
 # Input: graph, max graph size
 # Output: 
 #
-def tabu(graph, tabuSize, failCount=999999, maxSize=101):
-    size = len(graph) 
+def tabu(seed, tabuSize, maxSize=101):
 
+    # Initialize the search space
+    graph = copy.deepcopy(seed)
     cliqueCount = naiveCliqueCount(graph)
+
+    # Make sure the seed is valid
+    if cliqueCount != 0:
+        print "Seed is not a counterexample for R(6, 6). Aborting."
+        return
 
     # Create tabu list
     tabuList = OrderedSet.OrderedSet()
@@ -206,8 +263,8 @@ def tabu(graph, tabuSize, failCount=999999, maxSize=101):
     clockStart = time.clock()
     clockLastSolution = time.clock()
 
+    # Tabu search
     while len(graph) <= maxSize:
-        debug("tabu cliqueCount: %d" % (cliqueCount))
 
         # Found a counterexample
         if cliqueCount == 0:
@@ -215,9 +272,12 @@ def tabu(graph, tabuSize, failCount=999999, maxSize=101):
             # Timestamp solution
             clockFoundSolution = time.clock()
 
+            # This is the new seed
+            seed = copy.deepcopy(graph)
+
             # Sanity check
             if naiveCliqueCount(graph) != 0:
-                print "Error: Discrepancy between naive and vert0 counts. Abort"
+                print "Error: Discrepancy between naive and vert0 counts. Aborting."
                 sys.exit(1)
 
             print "Found counterexample!"
@@ -246,14 +306,26 @@ def tabu(graph, tabuSize, failCount=999999, maxSize=101):
             continue
 
         # Keep looking
-        # best = findLocalMinIter(tabuList, graph)
+        #best = findLocalMinIter(tabuList, graph)
         best = findLocalMinRand(tabuList, graph)
 
         # Could not find couterexample
         if len(best) == 0:
-            print "Could not find counterexample for size %d" % (len(graph))
+
+            # Try decreasing the tabu size
+            if tabuSize >= 0:
+                print "Search failed, resetting tabuSize to %d." % (tabuSize - 1)
+                tabuSize = tabuSize - 1
+                graph = copy.deepcopy(seed)
+                cliqueCount = 0
+                continue
+
+            # Should never get here -- tabu size of zero should run forever...
+            print "Could not find counterexample for size %d." % (len(graph))
             return
 
+
+        # Results of local search
         bestCount = best[0]
         bestI = best[1]
         bestJ = best[2]
@@ -261,8 +333,7 @@ def tabu(graph, tabuSize, failCount=999999, maxSize=101):
         # Keep the best edge-flip
         graph[bestI][bestJ] = 1 - graph[bestI][bestJ]
 
-        # Update the clique-count
-        # cliqueCount = naiveCliqueCount(graph)
+        # Update the clique count
         cliqueCount = bestCount
 
         # Taboo this edge
@@ -270,8 +341,18 @@ def tabu(graph, tabuSize, failCount=999999, maxSize=101):
             tabuList.pop(False)
         tabuList.add((bestI, bestJ))
 
-        print "[%d] Flipping (%d, %d), clique count: %d, taboo size: %d" % (len(graph), bestI, bestJ, cliqueCount, tabuSize)
+        sys.stdout.write("[%d] " % (len(graph)))
+        sys.stdout.write("Flipping (%d, %d), " % (bestI, bestJ))
+        sys.stdout.write("clique count: %d, " % (cliqueCount))
+        sys.stdout.write("taboo size: %d\n" % (tabuSize))
+#
+######################################################################
 
+
+######################################################################
+#
+# TESTING
+#
 testGraph1 = \
         [[ 0, 0, 1, 0, 1, 0, 1, 0 ],
          [ 0, 0, 1, 0, 1, 0, 1, 0 ],
@@ -283,14 +364,6 @@ testGraph1 = \
          [ 0, 0, 0, 0, 0, 0, 0, 0 ]]
 
 
-testGraph2 = \
-        [[ 0, 1, 0, 1, 0, 1, 0, 1 ],
-         [ 0, 0, 1, 0, 1, 0, 1, 0 ],
-         [ 0, 0, 0, 1, 0, 1, 0, 1 ],
-         [ 0, 0, 0, 0, 1, 0, 1, 0 ],
-         [ 0, 0, 0, 0, 0, 1, 0, 1 ],
-         [ 0, 0, 0, 0, 0, 0, 1, 0 ], 
-         [ 0, 0, 0, 0, 0, 0, 0, 1 ],
-         [ 0, 0, 0, 0, 0, 0, 0, 0 ]]
-
-tabu(testGraph1, 20)
+tabu(testGraph1, 100)
+#
+######################################################################
