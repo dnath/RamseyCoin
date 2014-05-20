@@ -40,8 +40,8 @@ import time
 #
 # Toggle debugging output
 #
-DEBUG = False
 DEBUG = True
+DEBUG = False
 def debug(msg):
     if DEBUG:
         sys.stdout.write(msg)
@@ -254,6 +254,7 @@ def tabu(seed, numWorkers=1, maxSize=101):
     graph = copy.deepcopy(seed)
     cliqueCount = naiveCliqueCount(graph)
     tabuSize = len(graph)
+    tabuDecrement = False
 
     # Make sure the seed is valid
     if cliqueCount != 0:
@@ -273,10 +274,24 @@ def tabu(seed, numWorkers=1, maxSize=101):
         # Found a counterexample
         if cliqueCount == 0:
 
-            # Timestamp solution
-            clockFoundSolution = time.clock()
+            # Check whether this is a new counterexample
+            if tabuDecrement == False:
 
-            # TODO: Dispatch graph
+                # Timestamp solution
+                clockFoundSolution = time.clock()
+
+                debug("Found counterexample!\n")
+                debug("Time elapsed since start: %f\n" % (clockFoundSolution-clockStart))
+                debug("Time elapsed since last counterexample: %f\n" % (clockFoundSolution-clockLastSolution))
+
+                clockLastSolution = clockFoundSolution
+
+                # Print graph
+                printGraph(graph)
+
+
+
+              # TODO: Dispatch graph
 
             # This is the new seed
             seed = copy.deepcopy(graph)
@@ -285,15 +300,6 @@ def tabu(seed, numWorkers=1, maxSize=101):
             if naiveCliqueCount(graph) != 0:
                 print "Error: Discrepancy between naive and vert0 counts. Aborting."
                 sys.exit(1)
-
-            debug("Found counterexample!\n")
-            debug("Time elapsed since start: %f\n" % (clockFoundSolution-clockStart))
-            debug("Time elapsed since last counterexample: %f\n" % (clockFoundSolution-clockLastSolution))
-
-            clockLastSolution = clockFoundSolution
-
-            # Print graph
-            printGraph(graph)
 
             # Add new vertex to adjacency matrix
             graphDim = len(graph)
@@ -308,7 +314,11 @@ def tabu(seed, numWorkers=1, maxSize=101):
 
             # Reset the tabu list
             tabuList.clear()
-            tabuSize = len(graph)
+            if tabuDecrement == True:
+                    tabuSize = tabuSize - 1
+                    tabuDecrement = False
+            else:
+                tabuSize = len(graph) / numWorkers 
 
             continue
 
@@ -321,8 +331,8 @@ def tabu(seed, numWorkers=1, maxSize=101):
 
             # Try decreasing the tabu size
             if tabuSize >= 0:
-                debug("Search failed, resetting tabuSize to %d." % (tabuSize - 1))
-                tabuSize = tabuSize - 1
+                debug("Search failed, resetting tabuSize to %d.\n" % (tabuSize - 1))
+                tabuDecrement = True
                 graph = copy.deepcopy(seed)
                 cliqueCount = 0
                 continue
