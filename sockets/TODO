@@ -1,0 +1,11 @@
+TODO
+
+Server sends the number of clients on the response message of getseed
+Kill taboo search using kill thread if you can not do it with a variable :D
+Handle request should be modified based on request type 
+
+Server checkpointing on S3
+
+Client kill thread, heartbeat, elect leader
+
+Devops!
