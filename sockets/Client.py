@@ -50,7 +50,7 @@ def bind_socket(host,port):
 #handle requests from the server
 def handle_request(request_json)
 	response_message = message(request_json)
-	
+
 
 
 
@@ -62,6 +62,17 @@ def accept_connections():
 		   	thread.start_new_thread( handle_request, (message_json))
 		except:
 	   		print "Error: unable to start thread"
+
+
+def vector_to_matrix(vector)
+	size = len(vector)
+	matrix_size = math.sqrt(size)
+	Matrix = [[0 for x in range(size)] for y in range(size)] 
+	for i in range(size):
+		for j in range(size):
+			Matrix[i][j] = vector[i*size+j]
+
+	return Matrix
 
 
 def main():
