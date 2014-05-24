@@ -14,6 +14,7 @@ Id = 1
 clients_file = "clients.txt"
 solution_directory = "solutions/" #define solution directory where there is a file for every counterexample size.
 solution_prefix = "sol_"
+IP = "127.0.0.1"
 host_name = socket.gethostname() # Get local machine name
 port_number = 12345                # Reserve a port for your service.
 
@@ -31,13 +32,18 @@ def list_file(directory):
 	onlyfiles = [ f for f in listdir(directory) if isfile(join(directory,f)) ]
 	return onlyfiles
 
-def handle_request(message_json):
+def handle_request(c, message_json):
 	request_message = message(message_json)
 	type = request_message.type
 
 	#get_seed, should be the first message from the client when it joins the system
 	if type == 0: #get_seed
-
+		#add client to client list
+		clientNode = Node(request_message.Id,request_message.IP,request_message.Port)
+		client_dictionary[clientNode.Id] = clientNode
+		#save clients list
+		save_clients_file (clients_file)
+		#list solution files
 		file_list = list_file(solution_directory)
 		file_list.sort()
 		if(len(file_list)!=0):
@@ -53,10 +59,16 @@ def handle_request(message_json):
 		data = request_message.data
 		size = math.sqrt(len(data))
 		filename = solution_directory + solution_prefix + str(size)
+		file_list = list_file(solution_directory)
 		f = open(filename, 'a')
 		f.write(data + "\n")
 		f.close()
 		c.close()
+		if filename not in file_list:
+			#new solution size
+			#broadcast this solution to every one
+			bcmessage = new message(2,data,Id,IP,port_number)
+			broad_cast(bcmessage)
 	#elif type == 2: # Heartbeat acknowledgement 
 
 
@@ -72,11 +84,9 @@ def accept_connections():
 		message_json = c.recv(15000)
 		print(message_json)
 		try:
-		   	thread.start_new_thread( handle_request, ("Thread-1", 2, ))
+		   	thread.start_new_thread( handle_request, (c, message_json))
 		except:
 	   		print "Error: unable to start thread"
-
-	   handle_request(c, message_json)
 
 
 #Any node in the system has and Id, IP and port. 
@@ -111,13 +121,23 @@ def save_clients_file(file_name,clients):
 		fp.write(clientString)
 	fp.close()
 
-
+#not used
 #Add new client connection data to clients file
 def add_new_client(file_name, client):
 	fp = open(file_name,"a")
 	clientString = clientObject.Id+","+clientObject.IP+","+clientObject.Port+"\n"
 	fp.write(clientString)
 	fp.close()
+
+def broad_cast(message):
+	for key in client_dictionary.keys():
+		client = client_dictionary[key]
+		s = socket.socket()         # Create a socket object
+		host = socket.gethostbyaddr(client.IP)[0]
+		s.connect((host, server_port))
+		s.send(message)
+		s.close() 
+
 
 
 def main ():

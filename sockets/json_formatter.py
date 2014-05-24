@@ -23,6 +23,7 @@ class CounterExample:
 #type 0 getseed request data is None
 #type 1 saveseed request data is counter example
 #type 2 takeseed response data is the largest counterexample we have
+
 class message:
 	def __init__(self, type, data=None, Id =None, IP = None, Port= None ):
 		if data != None:
