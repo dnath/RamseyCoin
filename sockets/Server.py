@@ -4,6 +4,7 @@ import socket               # Import socket module
 from json_formatter import *# Import json to object translation for counterexample class and message class 
 from os import listdir
 from os.path import isfile, join
+import thread
 import math
 
 #global variables
@@ -12,8 +13,7 @@ clients_file = "clients.txt"
 solution_directory = "solutions/" #define solution directory where there is a file for every counterexample size.
 solution_prefix = "sol_"
 IP = "127.0.0.1"
-#server_hostname = socket.gethostname() # Get local machine name
-server_hostname = "localhost"
+server_hostname = socket.gethostname() # Get local machine name
 server_port = 12345                # Reserve a port for your service.
 
 # Dictionary of client node which are running taboo search.
@@ -43,7 +43,7 @@ def handle_request(c, message_json):
         clientNode = Node(request_message.Id,request_message.IP,request_message.Port)
         client_dictionary[clientNode.Id] = clientNode
         #save clients list
-        save_clients_file (clients_file)
+        save_clients_file (clients_file, client_dictionary)
         #list solution files
         file_list = list_file(solution_directory)
         file_list.sort()
@@ -86,10 +86,11 @@ def accept_connections(s):
         c, addr = s.accept()     # Establish connection with client.
         message_json = c.recv(15000)
         print(message_json)
-        try:
-            thread.start_new_thread( handle_request, (c, message_json))
-        except:
-            print "Error: unable to start thread"
+        thread.start_new_thread( handle_request, (c, message_json))
+        #try:
+            #thread.start_new_thread( handle_request, (c, message_json))
+        #except:
+            #print "Error: unable to start thread"
 
 
 
@@ -113,7 +114,7 @@ def save_clients_file(file_name,clients):
 
     for key in clients.keys():
         clientObject = clients[key]
-        clientString = clientObject.Id+","+clientObject.IP+","+clientObject.Port+"\n"
+        clientString = str(clientObject.Id)+","+clientObject.IP+","+str(clientObject.Port)+"\n"
         fp.write(clientString)
     fp.close()
 

@@ -3,12 +3,14 @@
 import socket               # Import socket module
 from json_formatter import *# Import json to object translation for counterexample class and message class 
 from Tabu import tabu
+import thread
+import math
 
 client_id = 2
-server_ip  = "127.0.0.1"
+server_ip  = "127.0.1.1"
 server_port = 12345                # Reserve a port for your service.
 client_port = 12500
-client_hostname = "localhost"
+client_hostname = socket.gethostname()
 
 counter = 0 
 
@@ -64,11 +66,11 @@ def accept_connections():
 
 def vector_to_matrix(vector):
     size = len(vector)
-    matrix_size = math.sqrt(size)
-    Matrix = [[0 for x in range(size)] for y in range(size)] 
-    for i in range(size):
-        for j in range(size):
-            Matrix[i][j] = vector[i*size+j]
+    matrix_size = int(math.sqrt(size))
+    Matrix = [[0 for x in range(matrix_size)] for y in range(matrix_size)] 
+    for i in range(matrix_size):
+        for j in range(matrix_size):
+            Matrix[i][j] = int(vector[i*matrix_size+j])
 
     return Matrix
 
@@ -76,6 +78,8 @@ def main():
     print "Starting RamseyCoin Client..."
     print "> listening on %s:%d" % (client_hostname, client_port)
     seed = get_seed()
+    seed = vector_to_matrix(seed)
+    print seed
     print "Got seed, forking tabu search on separate thread"
     #start taboo search thread
     thread.start_new_thread(tabu(seed, 1))

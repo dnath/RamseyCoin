@@ -40,8 +40,8 @@ import time
 #
 # Toggle debugging output
 #
-DEBUG = True
 DEBUG = False
+DEBUG = True
 def debug(msg):
     if DEBUG:
         sys.stdout.write(msg)
