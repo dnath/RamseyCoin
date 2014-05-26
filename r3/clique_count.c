@@ -25,140 +25,140 @@
  */
 
 int CliqueCount_1(int *g,
-       int gsize)
+    int gsize)
 {
-    int i;
-    int j;
-    int k;
-    int l;
-    int m;
-    int n;
-    int count=0;
+  int i;
+  int j;
+  int k;
+  int l;
+  int m;
+  int n;
+  int count=0;
 
-    //////////////////
-    int sgsize = 6;
-    //////////////////
+  //////////////////
+  int sgsize = 6;
+  //////////////////
 
-    for(i=0;i < gsize-sgsize+1; i++)
+  for(i=0;i < gsize-sgsize+1; i++)
+  {
+    for(j=i+1;j < gsize-sgsize+2; j++)
     {
-  for(j=i+1;j < gsize-sgsize+2; j++)
-        {
       for(k=j+1;k < gsize-sgsize+3; k++) 
-            { 
-    if((g[i*gsize+j] == g[i*gsize+k]) && 
-       (g[i*gsize+j] == g[j*gsize+k]))
-    {
-        for(l=k+1;l < gsize-sgsize+4; l++) 
-        { 
-      if((g[i*gsize+j] == g[i*gsize+l]) && 
-         (g[i*gsize+j] == g[j*gsize+l]) && 
-         (g[i*gsize+j] == g[k*gsize+l]))
-      {
-          for(m=l+1;m < gsize-sgsize+5; m++) 
-          {
-        if((g[i*gsize+j] == g[i*gsize+m]) && 
-           (g[i*gsize+j] == g[j*gsize+m]) &&
-           (g[i*gsize+j] == g[k*gsize+m]) && 
-           (g[i*gsize+j] == g[l*gsize+m]))
+      { 
+        if((g[i*gsize+j] == g[i*gsize+k]) && 
+            (g[i*gsize+j] == g[j*gsize+k]))
         {
-          for(n=m+1;n<gsize-sgsize+6;n++)
-          {
-            if
-           ((g[i*gsize+j] == g[i*gsize+n]) && 
-           (g[i*gsize+j] == g[j*gsize+n]) &&
-           (g[i*gsize+j] == g[k*gsize+n]) && 
-           (g[i*gsize+j] == g[l*gsize+n]) &&
-           (g[i*gsize+j] == g[m*gsize+n]))
-          {
-            count++;
+          for(l=k+1;l < gsize-sgsize+4; l++) 
+          { 
+            if((g[i*gsize+j] == g[i*gsize+l]) && 
+                (g[i*gsize+j] == g[j*gsize+l]) && 
+                (g[i*gsize+j] == g[k*gsize+l]))
+            {
+              for(m=l+1;m < gsize-sgsize+5; m++) 
+              {
+                if((g[i*gsize+j] == g[i*gsize+m]) && 
+                    (g[i*gsize+j] == g[j*gsize+m]) &&
+                    (g[i*gsize+j] == g[k*gsize+m]) && 
+                    (g[i*gsize+j] == g[l*gsize+m]))
+                {
+                  for(n=m+1;n<gsize-sgsize+6;n++)
+                  {
+                    if
+                      ((g[i*gsize+j] == g[i*gsize+n]) && 
+                       (g[i*gsize+j] == g[j*gsize+n]) &&
+                       (g[i*gsize+j] == g[k*gsize+n]) && 
+                       (g[i*gsize+j] == g[l*gsize+n]) &&
+                       (g[i*gsize+j] == g[m*gsize+n]))
+                      {
+                        count++;
+                      }
+                  }
+
+                }
+              }
+            }
           }
-          }
-  
         }
-          }
       }
-        }
     }
-      }
-         }
-     }
-    return(count);
+  }
+  return(count);
 }
 
 double CliqueCountG(int *g, int gsize, double *countg)
 {
-    int i;
-    int j;
-    int k;
-    int l;
-    int m;
-    int n;
-    double count=0.0;
-    int sgsize = 6;
+  int i;
+  int j;
+  int k;
+  int l;
+  int m;
+  int n;
+  double count=0.0;
+  int sgsize = 6;
 
-    /*
-     * zero out countg
-     */
-    if(countg != NULL)
+  /*
+   * zero out countg
+   */
+  if(countg != NULL)
+  {
+    memset(countg,0,gsize*gsize*sizeof(double));
+  }
+
+  for(i=0;i < gsize-sgsize+1; i++)
+  {
+    for(j=i+1;j < gsize-sgsize+2; j++)
     {
-      memset(countg,0,gsize*gsize*sizeof(double));
-    }
-    
-    for(i=0;i < gsize-sgsize+1; i++)
-    {
-  for(j=i+1;j < gsize-sgsize+2; j++)
-        {
       for(k=j+1;k < gsize-sgsize+3; k++) 
-            { 
-    if((g[i*gsize+j] == g[i*gsize+k]) && 
-       (g[i*gsize+j] == g[j*gsize+k]))
-    {
-        for(l=k+1;l < gsize-sgsize+4; l++) 
-        { 
-      if((g[i*gsize+j] == g[i*gsize+l]) && 
-         (g[i*gsize+j] == g[j*gsize+l]) && 
-         (g[i*gsize+j] == g[k*gsize+l]))
-      {
-          for(m=l+1;m < gsize-sgsize+5; m++) 
-          {
-        if((g[i*gsize+j] == g[i*gsize+m]) && 
-           (g[i*gsize+j] == g[j*gsize+m]) &&
-           (g[i*gsize+j] == g[k*gsize+m]) && 
-           (g[i*gsize+j] == g[l*gsize+m]))
+      { 
+        if((g[i*gsize+j] == g[i*gsize+k]) && 
+            (g[i*gsize+j] == g[j*gsize+k]))
         {
-          for(n=m+1;n<gsize-sgsize+6;n++)
-          {
-            if
-           ((g[i*gsize+j] == g[i*gsize+n]) && 
-           (g[i*gsize+j] == g[j*gsize+n]) &&
-           (g[i*gsize+j] == g[k*gsize+n]) && 
-           (g[i*gsize+j] == g[l*gsize+n]) &&
-           (g[i*gsize+j] == g[m*gsize+n]))
-          {
-            count++;
-            if(countg != NULL)
+          for(l=k+1;l < gsize-sgsize+4; l++) 
+          { 
+            if((g[i*gsize+j] == g[i*gsize+l]) && 
+                (g[i*gsize+j] == g[j*gsize+l]) && 
+                (g[i*gsize+j] == g[k*gsize+l]))
             {
-              countg[i*gsize+j]++;  countg[i*gsize+k]++;
-              countg[i*gsize+l]++;  countg[i*gsize+m]++;
-              countg[i*gsize+n]++;  countg[j*gsize+k]++;
-              countg[j*gsize+l]++;  countg[j*gsize+m]++;
-              countg[j*gsize+n]++;  countg[k*gsize+l]++;
-              countg[k*gsize+m]++;  countg[k*gsize+n]++;
-              countg[l*gsize+m]++;  countg[l*gsize+n]++;
-              countg[m*gsize+n]++;
+              for(m=l+1;m < gsize-sgsize+5; m++) 
+              {
+                if((g[i*gsize+j] == g[i*gsize+m]) && 
+                    (g[i*gsize+j] == g[j*gsize+m]) &&
+                    (g[i*gsize+j] == g[k*gsize+m]) && 
+                    (g[i*gsize+j] == g[l*gsize+m]))
+                {
+                  for(n=m+1;n<gsize-sgsize+6;n++)
+                  {
+                    if
+                      ((g[i*gsize+j] == g[i*gsize+n]) && 
+                       (g[i*gsize+j] == g[j*gsize+n]) &&
+                       (g[i*gsize+j] == g[k*gsize+n]) && 
+                       (g[i*gsize+j] == g[l*gsize+n]) &&
+                       (g[i*gsize+j] == g[m*gsize+n]))
+                      {
+                        count++;
+                        if(countg != NULL)
+                        {
+                          countg[i*gsize+j]++;  countg[i*gsize+k]++;
+                          countg[i*gsize+l]++;  countg[i*gsize+m]++;
+                          countg[i*gsize+n]++;  countg[j*gsize+k]++;
+                          countg[j*gsize+l]++;  countg[j*gsize+m]++;
+                          countg[j*gsize+n]++;  countg[k*gsize+l]++;
+                          countg[k*gsize+m]++;  countg[k*gsize+n]++;
+                          countg[l*gsize+m]++;  countg[l*gsize+n]++;
+                          countg[m*gsize+n]++;
+                        }
+                      }
+                  }
+
+                }
+              }
             }
           }
-          }
-  
         }
-          }
       }
-        }
     }
-      }
-         }
-     }
-    return(count);
+  }
+  return(count);
 }
 /*******************************************************************************************************/
 
@@ -176,60 +176,60 @@ double CliqueCountG(int *g, int gsize, double *countg)
 
 int CliqueCount_2(int *g, int gsize)
 {
-    int i;
-    int j;
-    int k;
-    int l;
-    int m;
-    int n;
-    int count=0;
-    int sgsize = 6;
-    
-    for(i=0;i < gsize-sgsize+1; i++)
+  int i;
+  int j;
+  int k;
+  int l;
+  int m;
+  int n;
+  int count=0;
+  int sgsize = 6;
+
+  for(i=0;i < gsize-sgsize+1; i++)
+  {
+    for(j=i+1;j < gsize-sgsize+2; j++)
     {
-  for(j=i+1;j < gsize-sgsize+2; j++)
-        {
       for(k=j+1;k < gsize-sgsize+3; k++) 
-            { 
-    if((g[i*gsize+j] == g[i*gsize+k]) && 
-       (g[i*gsize+j] == g[j*gsize+k]))
-    {
-        for(l=k+1;l < gsize-sgsize+4; l++) 
-        { 
-      if((g[i*gsize+j] == g[i*gsize+l]) && 
-         (g[i*gsize+j] == g[j*gsize+l]) && 
-         (g[i*gsize+j] == g[k*gsize+l]))
-      {
-          for(m=l+1;m < gsize-sgsize+5; m++) 
-          {
-        if((g[i*gsize+j] == g[i*gsize+m]) && 
-           (g[i*gsize+j] == g[j*gsize+m]) &&
-           (g[i*gsize+j] == g[k*gsize+m]) && 
-           (g[i*gsize+j] == g[l*gsize+m])) {
-          for(n=m+1; n < gsize-sgsize+6; n++)
-          {
-            if((g[i*gsize+j]
-              == g[i*gsize+n]) &&
-               (g[i*gsize+j] 
-              == g[j*gsize+n]) &&
-               (g[i*gsize+j] 
-              == g[k*gsize+n]) &&
-               (g[i*gsize+j] 
-              == g[l*gsize+n]) &&
-               (g[i*gsize+j] 
-              == g[m*gsize+n])) {
+      { 
+        if((g[i*gsize+j] == g[i*gsize+k]) && 
+            (g[i*gsize+j] == g[j*gsize+k]))
+        {
+          for(l=k+1;l < gsize-sgsize+4; l++) 
+          { 
+            if((g[i*gsize+j] == g[i*gsize+l]) && 
+                (g[i*gsize+j] == g[j*gsize+l]) && 
+                (g[i*gsize+j] == g[k*gsize+l]))
+            {
+              for(m=l+1;m < gsize-sgsize+5; m++) 
+              {
+                if((g[i*gsize+j] == g[i*gsize+m]) && 
+                    (g[i*gsize+j] == g[j*gsize+m]) &&
+                    (g[i*gsize+j] == g[k*gsize+m]) && 
+                    (g[i*gsize+j] == g[l*gsize+m])) {
+                  for(n=m+1; n < gsize-sgsize+6; n++)
+                  {
+                    if((g[i*gsize+j]
+                          == g[i*gsize+n]) &&
+                        (g[i*gsize+j] 
+                         == g[j*gsize+n]) &&
+                        (g[i*gsize+j] 
+                         == g[k*gsize+n]) &&
+                        (g[i*gsize+j] 
+                         == g[l*gsize+n]) &&
+                        (g[i*gsize+j] 
+                         == g[m*gsize+n])) {
                       count++;
+                    }
+                  }
+                }
+              }
             }
           }
         }
-          }
       }
-        }
     }
-      }
-         }
-     }
-    return(count);
+  }
+  return(count);
 }
 
 /*******************************************************************************************************/
