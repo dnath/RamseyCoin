@@ -57,7 +57,8 @@ def handle_PUT_SEED(c, request_message):
   # to maintain sorting
   str_size = '%.3d' % size
   
-  filename = solution_directory + solution_prefix + str_size
+  filename = solution_directory + solution_prefix + str_size + '.0'
+  # print filename
   file_list = list_file(solution_directory)
   
   f = open(filename, 'a')
