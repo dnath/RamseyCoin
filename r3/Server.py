@@ -166,7 +166,7 @@ def add_new_client(file_name, client):
     fp.close()
 
 def broad_cast(message):
-    print 'Broadcast...\n', message 
+    # print 'Broadcast...\n', message 
     for key in client_dictionary.keys():
         client = client_dictionary[key]
         s = socket.socket()         # Create a socket object
