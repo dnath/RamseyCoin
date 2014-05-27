@@ -4,6 +4,8 @@ import sys
 import random
 import os
 import math
+import json_formatter
+import sockets
 from tabu import *
 
 g_kill_mutex = None
@@ -182,6 +184,17 @@ class TabuWorker(threading.Thread):
           break
       else:
         skip -= 1
+
+  def save_seed(self, seed):
+    request_message = message(1, seed, client_id, client_hostname, client_port)
+    s = socket.socket()         # Create a socket object
+    #Get server hostname, it returns an array with the hostname in the first element
+    server_host = socket.gethostbyaddr(server_ip)[0] 
+    #Connect to the server
+    s.connect((server_host, server_port))
+    #send getseed request to the server
+    s.send(request_message.get_json())
+    s.close()
 
 def init():
   global g_kill_mutex

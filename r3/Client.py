@@ -35,7 +35,6 @@ def get_seed():
     response_message = message(seed)
     return response_message.data.strip()
 
-
 def save_seed(seed):
     request_message = message(1, seed, client_id, client_hostname, client_port)
     s = socket.socket()         # Create a socket object
