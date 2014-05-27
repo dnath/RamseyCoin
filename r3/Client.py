@@ -8,6 +8,9 @@ import math
 import time
 import tabu_worker as tw
 from common import *
+import signal
+import sys
+import threading
 
 client_id = 2
 
@@ -18,6 +21,8 @@ server_host = socket.gethostbyaddr(server_ip)[0]  #Get server hostname, it retur
 client_port = 12500
 client_hostname = socket.gethostname()
 client_ip = socket.gethostbyname(client_hostname)
+g_tabu_worker_thread = None
+g_sigint = False
 
 counter = 0 
 
@@ -36,21 +41,19 @@ def get_seed():
     response_message = message(seed)
     return response_message.data.strip()
 
-def save_seed(seed):
-    request_message = message(1, seed, client_id, client_hostname, client_port)
-    s = socket.socket()         # Create a socket object
-    #Connect to the server
-    s.connect((server_host, server_port))
-    #send getseed request to the server
-    s.send(request_message.get_json())
-    s.close()
-
 def bind_socket(host,port):
     s = socket.socket()         # Create a socket object
     s.bind((host, port))        # Bind to the port
     s.listen(5)                 # Now wait for client connection.
 
 def accept_connections():
+    global g_tabu_worker_thread
+
+    # print 'accept_connections'
+
+    if g_sigint:
+      sys.exit(0)
+
     s = socket.socket()
     s.settimeout(TIMEOUT)
     s.bind((client_hostname, client_port))
@@ -65,40 +68,85 @@ def accept_connections():
             message_json += chunk
         resp = message(message_json)
         if resp.type == PUT_SEED:
-            ## FIXME kill_TabuWorker_threads should block
-            tw.kill_TabuWorker_threads()
+            
+            if g_tabu_worker_thread.stopped == False:
+              tw.kill_TabuWorker_threads()
+              ## blocking on  kill_TabuWorker_threads
+              while g_tabu_worker_thread.stopped == False:
+                time.sleep(1)
+
+              print 'KILLED g_tabu_worker_thread'
+
+            else:
+              print 'g_tabu_worker_thread already stopped'
+
             seed = resp.data.strip()
+            
             tw.init()
-            tabu_worker_thread = tw.TabuWorker(seed, send_seed_flag=True, 
-                        client_id=client_id, client_hostname=client_hostname, client_port=client_port, 
-                        server_host=server_host, server_port=server_port, server_ip=server_ip,
-                        numWorkers=1, maxSize=102, debugON=False, maxSkipSteps=10)
-            tabu_worker_thread.start()
+            g_tabu_worker_thread = \
+              tw.TabuWorker(seed, send_seed_flag=True, 
+                            client_id=client_id, client_hostname=client_hostname, client_port=client_port, 
+                            server_host=server_host, server_port=server_port, server_ip=server_ip,
+                            numWorkers=1, maxSize=102, debugON=False, maxSkipSteps=10)
+            g_tabu_worker_thread.start()
+            print 'g_tabu_worker_thread started...'
 
         elif resp.type == HEARTBEAT:
             print "Recieved heartbeat."
             resp = message(HEARTBEAT, "Beep beep.", client_id, client_ip, client_port)
             s.send(resp.get_json())
+            print "Sent heartbeat ACK."
 
     except:
         print "Socket timed out."
     s.close()
 
+def sigint_exit(signum, frame):
+  global g_sigint
+  global g_tabu_worker_thread
+
+  if threading.current_thread().__class__.__name__ == '_MainThread':
+    print 'handling SIGINT'
+
+    g_sigint = True
+
+    if g_tabu_worker_thread is None:
+      sys.exit(0)
+    if g_tabu_worker_thread.stopped:
+      # print 'g_tabu_worker_thread.isAlive() =', g_tabu_worker_thread.isAlive()
+      sys.exit(0)
+
+    tw.kill_TabuWorker_threads()
+
+    ## blocking on  kill_TabuWorker_threads
+    while g_tabu_worker_thread.stopped == False:
+      time.sleep(1)
+
+    print 'KILLED g_tabu_worker_thread'
+    sys.exit(0)
 
 def main():
+    global g_tabu_worker_thread
+
+
+    signal.signal(signal.SIGINT, sigint_exit)
+    
     print "Starting RamseyCoin Client..."
     print "> Trying on %s:%d" % (client_hostname, client_port)
+    
     seed = get_seed()
     print "seed =", seed
     print "Got seed, forking tabu search on separate thread..."
-    # start taboo search thread
     
+    ## start taboo search thread
     tw.init()
-    tabu_worker_thread = tw.TabuWorker(seed, send_seed_flag=True, 
+    g_tabu_worker_thread = \
+        tw.TabuWorker(seed, send_seed_flag=True, 
                       client_id=client_id, client_hostname=client_hostname, client_port=client_port, 
                       server_host=server_host, server_port=server_port, server_ip=server_ip,
                       numWorkers=1, maxSize=102, debugON=False, maxSkipSteps=10)
-    tabu_worker_thread.start()
+    g_tabu_worker_thread.start()
+
     # now listen for messages from Server
     while True:
         accept_connections()

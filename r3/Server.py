@@ -157,6 +157,7 @@ def add_new_client(file_name, client):
     fp.close()
 
 def broad_cast(message):
+    print 'Broadcast...\n', message 
     for key in client_dictionary.keys():
         client = client_dictionary[key]
         s = socket.socket()         # Create a socket object
@@ -172,7 +173,7 @@ def main ():
     print "Starting RamseyCoin Server..."
     # Start the heartbeat
     thread.start_new_thread(heartbeat, ())
-    #Open a socket 
+    # Open a socket 
     sock = bind_socket(server_hostname, server_port)
     print "listening on %s:%d." % (server_hostname, server_port)
     #accept client messages

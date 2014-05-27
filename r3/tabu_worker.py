@@ -40,6 +40,8 @@ class TabuWorker(threading.Thread):
     self.server_port = server_port
     self.server_ip = server_ip
 
+    self.stopped = False
+
 
   def write_solution(self, graph):
     gsize = len(graph)
@@ -197,6 +199,7 @@ class TabuWorker(threading.Thread):
 
         if k:
           # check if need to be killed or not
+          self.stopped = True
           s = 'Tabu Worker : KILLED'
           print str(threading.current_thread()) + ':' + s
           break
@@ -205,6 +208,7 @@ class TabuWorker(threading.Thread):
 
   def save_seed(self, graph):
     gsize = len(graph)
+    print 'Saving seed, size = ', gsize
     seed = ''
     for i in xrange(gsize):
       for j in xrange(gsize):
@@ -240,7 +244,6 @@ def kill_TabuWorker_threads():
 
   print 'Kill All'
   print 'END'
-
 
 if __name__ == '__main__':
 
