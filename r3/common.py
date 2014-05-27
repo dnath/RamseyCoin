@@ -6,3 +6,5 @@ def list_files(directory):
 GET_SEED = 0
 PUT_SEED = 1
 HEARTBEAT = 2
+
+TIMEOUT = 180

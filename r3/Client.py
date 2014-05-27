@@ -7,11 +7,13 @@ import thread
 import math
 import time
 import tabu_worker as tw
+from common import *
 
 client_id = 2
 
-server_ip  = "127.0.0.1"
+server_ip  = "127.0.1.1"
 server_port = 12345                # Reserve a port for your service.
+server_host = socket.gethostbyaddr(server_ip)[0]  #Get server hostname, it returns an array with the hostname in the first element
 
 client_port = 12500
 client_hostname = socket.gethostname()
@@ -22,8 +24,6 @@ def get_seed():
     request_message = message(0, "", client_id, client_hostname, client_port)
     s = socket.socket()         # Create a socket object
 
-    #Get server hostname, it returns an array with the hostname in the first element
-    server_host = socket.gethostbyaddr(server_ip)[0] 
     #Connect to the server
     print "Connecting to Server at %s:%d" % (server_host, server_port)
     s.connect((server_host, server_port))
@@ -39,8 +39,6 @@ def get_seed():
 def save_seed(seed):
     request_message = message(1, seed, client_id, client_hostname, client_port)
     s = socket.socket()         # Create a socket object
-    #Get server hostname, it returns an array with the hostname in the first element
-    server_host = socket.gethostbyaddr(server_ip)[0] 
     #Connect to the server
     s.connect((server_host, server_port))
     #send getseed request to the server
@@ -52,25 +50,10 @@ def bind_socket(host,port):
     s.bind((host, port))        # Bind to the port
     s.listen(5)                 # Now wait for client connection.
 
-
-#handle requests from the server
-def handle_request(request_json):
-    resp = message(request_json)
-    # Someone has found a larger counterexample
-    if resp.type == PUT_SEED:
-        ## FIXME kill_TabuWorker_threads should block
-        tw.kill_TabuWorker_threads()
-        seed = resp.data.strip()
-        tw.init()
-        tabu_worker_thread = tw.TabuWorker(seed, debugON=True, maxSkipSteps=10)
-        tabu_worker_thread.start()
-        return
-
-  elif resp.type == HEARTBEAT:
-
 def accept_connections():
     s = socket.socket()
-    s.bind((host, port))
+    s.settimeout(TIMEOUT)
+    s.bind((client_hostname, client_port))
     s.listen(1)
     conn, addr = s.accept()
     message_json  = ""
@@ -79,7 +62,21 @@ def accept_connections():
         if not chunk:
             break
         message_json += chunk
-    thread.start_new_thread(handle_request, (message_json))
+    resp = message(message_json)
+    if resp.type == PUT_SEED:
+        ## FIXME kill_TabuWorker_threads should block
+        tw.kill_TabuWorker_threads()
+        seed = resp.data.strip()
+        tw.init()
+        tabu_worker_thread = tw.TabuWorker(seed, debugON=False, maxSkipSteps=10)
+        tabu_worker_thread.start()
+
+    elif resp.type == HEARTBEAT:
+        resp = message(HEARTBEET, "Beep beep.", client_id, client_ip, client_port)
+        s.send(resp.get_json())
+
+    s.close()
+
 
 def main():
     print "Starting RamseyCoin Client..."
@@ -89,10 +86,13 @@ def main():
     print "Got seed, forking tabu search on separate thread..."
     # start taboo search thread
     tw.init()
-    tabu_worker_thread = tw.TabuWorker(seed, debugON=True, maxSkipSteps=10)
+    tabu_worker_thread = tw.TabuWorker(seed, debugON=False, maxSkipSteps=10)
     tabu_worker_thread.start()
-    time.sleep(5)
-    tw.kill_TabuWorker_threads()
+    # now listen for messages from Server
+    while True:
+        accept_connections()
+    #time.sleep(5)
+    #tw.kill_TabuWorker_threads()
 
     # bind a socket in the client for furthet communication
     # bind_socket(client_hostname, client_port)
