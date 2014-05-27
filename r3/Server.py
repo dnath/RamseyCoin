@@ -1,11 +1,13 @@
 #!/usr/bin/python           # This is server.py file
 
 import socket               # Import socket module
+import time
 from json_formatter import *# Import json to object translation for counterexample class and message class 
 from os import listdir
 from os.path import isfile, join
 import thread
 import math
+from common import *
 
 #global variables
 Id = 1
@@ -15,6 +17,7 @@ solution_prefix = "sol_"
 IP = "127.0.0.1"
 server_hostname = socket.gethostname() # Get local machine name
 server_port = 12345                # Reserve a port for your service.
+heartbeat_port = 12346
 
 # Dictionary of client node which are running taboo search.
 # This dictionary should be saved on some presistent storage S3
@@ -31,6 +34,14 @@ class Node:
 def list_file(directory):
     onlyfiles = [ f for f in listdir(directory) if isfile(join(directory,f)) ]
     return onlyfiles
+
+def heartbeat():
+    s = socket.socket()
+    while True:
+        print "Sending heartbeat..."
+        bcmessage = message(HEARTBEAT, "Beep.", Id, IP, server_port)
+        broad_cast(bcmessage.get_json())
+        time.sleep(60)
 
 def handle_request(c, message_json):
     request_message = message(message_json)
@@ -70,7 +81,7 @@ def handle_request(c, message_json):
             #new solution size
             #broadcast this solution to every one
             bcmessage = message(2,data,Id,IP,server_port)
-            broad_cast(bcmessage)
+            broad_cast(bcmessage.get_json())
     #elif type == 2: # Heartbeat acknowledgement 
 
 
@@ -131,14 +142,17 @@ def broad_cast(message):
         client = client_dictionary[key]
         s = socket.socket()         # Create a socket object
         host = socket.gethostbyaddr(client.IP)[0]
-        s.connect((host, server_port))
-        s.send(message)
-        s.close() 
-
-
+        try:
+            s.connect((host, client.Port))
+            s.send(message)
+            s.close() 
+        except:
+            print "Could not connect to %s:%d." % (host, client.Port)
 
 def main ():
     print "Starting RamseyCoin Server..."
+    # Start the heartbeat
+    thread.start_new_thread(heartbeat, ())
     #Open a socket 
     sock = bind_socket(server_hostname, server_port)
     print "listening on %s:%d." % (server_hostname, server_port)

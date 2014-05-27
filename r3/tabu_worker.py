@@ -4,9 +4,10 @@ import sys
 import random
 import os
 import math
-import json_formatter
+from json_formatter import *
 import socket
 from tabu import *
+from common import *
 
 g_kill_mutex = None
 g_kill_flag = False

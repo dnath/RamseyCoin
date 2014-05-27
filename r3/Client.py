@@ -17,6 +17,7 @@ server_host = socket.gethostbyaddr(server_ip)[0]  #Get server hostname, it retur
 
 client_port = 12500
 client_hostname = socket.gethostname()
+client_ip = socket.gethostbyname(client_hostname)
 
 counter = 0 
 
@@ -54,25 +55,33 @@ def accept_connections():
     s.settimeout(TIMEOUT)
     s.bind((client_hostname, client_port))
     s.listen(1)
-    conn, addr = s.accept()
-    message_json  = ""
-    while True:
-        chunk = c.recv(1024)
-        if not chunk:
-            break
-        message_json += chunk
-    resp = message(message_json)
-    if resp.type == PUT_SEED:
-        ## FIXME kill_TabuWorker_threads should block
-        tw.kill_TabuWorker_threads()
-        seed = resp.data.strip()
-        tw.init()
-        tabu_worker_thread = tw.TabuWorker(seed, debugON=False, maxSkipSteps=10)
-        tabu_worker_thread.start()
+    try:
+        conn, addr = s.accept()
+        message_json  = ""
+        while True:
+            chunk = conn.recv(1024)
+            if not chunk:
+                break
+            message_json += chunk
+        resp = message(message_json)
+        if resp.type == PUT_SEED:
+            ## FIXME kill_TabuWorker_threads should block
+            tw.kill_TabuWorker_threads()
+            seed = resp.data.strip()
+            tw.init()
+            tabu_worker_thread = tw.TabuWorker(seed, send_seed_flag=True, 
+                        client_id=client_id, client_hostname=client_hostname, client_port=client_port, 
+                        server_host=server_host, server_port=server_port, server_ip=server_ip,
+                        numWorkers=1, maxSize=102, debugON=False, maxSkipSteps=10)
+            tabu_worker_thread.start()
 
-    elif resp.type == HEARTBEAT:
-        resp = message(HEARTBEET, "Beep beep.", client_id, client_ip, client_port)
-        s.send(resp.get_json())
+        elif resp.type == HEARTBEAT:
+            print "Recieved heartbeat."
+            resp = message(HEARTBEAT, "Beep beep.", client_id, client_ip, client_port)
+            s.send(resp.get_json())
+
+    except:
+        print "Socket timed out."
 
     s.close()
 
@@ -88,18 +97,13 @@ def main():
     tw.init()
     tabu_worker_thread = tw.TabuWorker(seed, send_seed_flag=True, 
                       client_id=client_id, client_hostname=client_hostname, client_port=client_port, 
-                      server_host=server_host, server_port=server_port, server_ip=server_ip
-                      numWorkers=1, maxSize=102, debugON=True, maxSkipSteps=10):
+                      server_host=server_host, server_port=server_port, server_ip=server_ip,
+                      numWorkers=1, maxSize=102, debugON=False, maxSkipSteps=10)
     tabu_worker_thread.start()
     # now listen for messages from Server
     while True:
         accept_connections()
     #time.sleep(5)
     #tw.kill_TabuWorker_threads()
-
-    # bind a socket in the client for furthet communication
-    # bind_socket(client_hostname, client_port)
-    # listen for connections from the server
-    # accept_connections()
 
 main()
