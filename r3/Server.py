@@ -10,6 +10,8 @@ import math
 from common import *
 
 #global variables
+
+DEBUG = True
 Id = 1
 clients_file = "clients.txt"
 solution_directory = "solutions/" #define solution directory where there is a file for every counterexample size.
@@ -23,6 +25,10 @@ heartbeat_port = 12346
 # This dictionary should be saved on some presistent storage S3
 # It will be used in case of schedular failer
 client_dictionary = {}
+
+def debug(msg):
+  if DEBUG:
+    print msg
 
 #Any node in the system has and Id, IP and port. 
 class Node: 
@@ -43,45 +49,58 @@ def heartbeat():
         broad_cast(bcmessage.get_json())
         time.sleep(60)
 
+def handle_PUT_SEED(c, request_message):
+  print "Recieved 'save_counterexample' request from client"
+  data = request_message.data
+  size = math.sqrt(len(data))
+  filename = solution_directory + solution_prefix + str(size)
+  file_list = list_file(solution_directory)
+  f = open(filename, 'a')
+  f.write(data + "\n")
+  f.close()
+  c.close()
+  if filename not in file_list:
+    #new solution size
+    #broadcast this solution to every one
+    bcmessage = message(2,data,Id,IP,server_port)
+    broad_cast(bcmessage.get_json())
+
+def handle_GET_SEED(c, request_message):
+  print "Recieved 'get_seed' request from client"
+  #add client to client list
+  clientNode = Node(request_message.Id,request_message.IP,request_message.Port)
+  client_dictionary[clientNode.Id] = clientNode
+  #save clients list
+  save_clients_file (clients_file, client_dictionary)
+  #list solution files
+  file_list = list_file(solution_directory)
+  file_list.sort()
+  if(len(file_list)!=0):
+    f = open(solution_directory + file_list[len(file_list)-1],"r")
+    line = f.readline()
+    f.close()
+    response_message = message (2,line)
+    c.send(response_message.get_json())
+  else:
+    c.send("no counterexample available")
+  c.close()
+
 def handle_request(c, message_json):
     request_message = message(message_json)
     type = request_message.type
+    
+    # get_seed, should be the first message from the client when it joins the system
+    # get_seed
+    if type == GET_SEED:
+      debug('handling GET_SEED')
+      handle_GET_SEED(c, request_message)  
 
-    #get_seed, should be the first message from the client when it joins the system
-    if type == 0: #get_seed
-        print "Recieved 'get_seed' request from client"
-        #add client to client list
-        clientNode = Node(request_message.Id,request_message.IP,request_message.Port)
-        client_dictionary[clientNode.Id] = clientNode
-        #save clients list
-        save_clients_file (clients_file, client_dictionary)
-        #list solution files
-        file_list = list_file(solution_directory)
-        file_list.sort()
-        if(len(file_list)!=0):
-            f = open(solution_directory + file_list[len(file_list)-1],"r")
-            line = f.readline()
-            f.close()
-            response_message = message (2,line)
-            c.send(response_message.get_json())
-        else:
-            c.send("no counterexample available")
-        c.close()
-    elif type == 1: #save_counter_example
-        print "Recieved 'save_counterexample' request from client"
-        data = request_message.data
-        size = math.sqrt(len(data))
-        filename = solution_directory + solution_prefix + str(size)
-        file_list = list_file(solution_directory)
-        f = open(filename, 'a')
-        f.write(data + "\n")
-        f.close()
-        c.close()
-        if filename not in file_list:
-            #new solution size
-            #broadcast this solution to every one
-            bcmessage = message(2,data,Id,IP,server_port)
-            broad_cast(bcmessage.get_json())
+    # save_counter_example
+    # save seed == PUT_SEED in server
+    elif type == PUT_SEED: 
+      debug('handling PUT_SEED')
+      handle_PUT_SEED(c, request_message)
+
     #elif type == 2: # Heartbeat acknowledgement 
 
 

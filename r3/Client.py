@@ -11,7 +11,7 @@ from common import *
 
 client_id = 2
 
-server_ip  = "127.0.1.1"
+server_ip  = "127.0.0.1"
 server_port = 12345                # Reserve a port for your service.
 server_host = socket.gethostbyaddr(server_ip)[0]  #Get server hostname, it returns an array with the hostname in the first element
 
@@ -82,7 +82,6 @@ def accept_connections():
 
     except:
         print "Socket timed out."
-
     s.close()
 
 
@@ -103,7 +102,8 @@ def main():
     # now listen for messages from Server
     while True:
         accept_connections()
-    #time.sleep(5)
-    #tw.kill_TabuWorker_threads()
+    
+    # time.sleep(5)
+    # tw.kill_TabuWorker_threads()
 
 main()
