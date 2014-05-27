@@ -55,7 +55,18 @@ def bind_socket(host,port):
 
 #handle requests from the server
 def handle_request(request_json):
-  response_message = message(request_json)
+    resp = message(request_json)
+    # Someone has found a larger counterexample
+    if resp.type == PUT_SEED:
+        ## FIXME kill_TabuWorker_threads should block
+        tw.kill_TabuWorker_threads()
+        seed = resp.data.strip()
+        tw.init()
+        tabu_worker_thread = tw.TabuWorker(seed, debugON=True, maxSkipSteps=10)
+        tabu_worker_thread.start()
+        return
+
+  elif resp.type == HEARTBEAT:
 
 def accept_connections():
     s = socket.socket()
