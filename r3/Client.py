@@ -84,8 +84,12 @@ def main():
     print "seed =", seed
     print "Got seed, forking tabu search on separate thread..."
     # start taboo search thread
+    
     tw.init()
-    tabu_worker_thread = tw.TabuWorker(seed, debugON=False, maxSkipSteps=10)
+    tabu_worker_thread = tw.TabuWorker(seed, send_seed_flag=True, 
+                      client_id=client_id, client_hostname=client_hostname, client_port=client_port, 
+                      server_host=server_host, server_port=server_port, server_ip=server_ip
+                      numWorkers=1, maxSize=102, debugON=True, maxSkipSteps=10):
     tabu_worker_thread.start()
     # now listen for messages from Server
     while True:

@@ -5,14 +5,17 @@ import random
 import os
 import math
 import json_formatter
-import sockets
+import socket
 from tabu import *
 
 g_kill_mutex = None
 g_kill_flag = False
 
 class TabuWorker(threading.Thread):
-  def __init__(self, seed, numWorkers=1, maxSize=102, debugON=False, maxSkipSteps=10):
+  def __init__(self, seed, send_seed_flag=False, 
+                      client_id=None, client_hostname=None, client_port=None, 
+                      server_host=None, server_port=None, server_ip=None,
+                      numWorkers=1, maxSize=102, debugON=False, maxSkipSteps=10):
     super(TabuWorker, self).__init__()
 
     self.debugON = debugON
@@ -26,6 +29,15 @@ class TabuWorker(threading.Thread):
     self.numWorkers = numWorkers
     self.maxSize = maxSize
     self.maxSkipSteps = maxSkipSteps
+
+    self.send_seed_flag = send_seed_flag
+    self.client_id = client_id
+    self.client_hostname = client_hostname
+    self.client_port = client_port
+
+    self.server_host = server_host
+    self.server_port = server_port
+    self.server_ip = server_ip
 
 
   def write_solution(self, graph):
@@ -93,7 +105,12 @@ class TabuWorker(threading.Thread):
           # Print graph
           # printGraph(graph)
 
-          self.write_solution(graph)
+          if self.send_seed_flag:
+            self.debug('Sending new solution to server...')
+            self.save_seed(graph)
+          else:
+            self.debug('Writing new solution...')
+            self.write_solution(graph)
 
           # TODO: Dispatch graph
 
@@ -185,16 +202,25 @@ class TabuWorker(threading.Thread):
       else:
         skip -= 1
 
-  def save_seed(self, seed):
-    request_message = message(1, seed, client_id, client_hostname, client_port)
-    s = socket.socket()         # Create a socket object
+  def save_seed(self, graph):
+    gsize = len(graph)
+    seed = ''
+    for i in xrange(gsize):
+      for j in xrange(gsize):
+        seed += str(graph[i][j])
+
+    request_message = message(PUT_SEED, seed, self.client_id, self.client_hostname, self.client_port)
+    # Create a socket object
+    s = socket.socket()
     #Get server hostname, it returns an array with the hostname in the first element
-    server_host = socket.gethostbyaddr(server_ip)[0] 
+    server_host = socket.gethostbyaddr(self.server_ip)[0] 
     #Connect to the server
-    s.connect((server_host, server_port))
+    s.connect((self.server_host, self.server_port))
     #send getseed request to the server
     s.send(request_message.get_json())
     s.close()
+
+    self.debug('seed of size = ' + str(gsize) + ' sent')
 
 def init():
   global g_kill_mutex
