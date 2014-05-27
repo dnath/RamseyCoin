@@ -53,12 +53,20 @@ def handle_PUT_SEED(c, request_message):
   print "Recieved 'save_counterexample' request from client"
   data = request_message.data
   size = math.sqrt(len(data))
-  filename = solution_directory + solution_prefix + str(size)
+  
+  str_size = str(size)
+  # to maintain sorting
+  if size < 10:
+    str_size = '0' + str_size
+  
+  filename = solution_directory + solution_prefix + str_size
   file_list = list_file(solution_directory)
+  
   f = open(filename, 'a')
   f.write(data + "\n")
   f.close()
   c.close()
+  
   if filename not in file_list:
     #new solution size
     #broadcast this solution to every one
@@ -75,6 +83,7 @@ def handle_GET_SEED(c, request_message):
   #list solution files
   file_list = list_file(solution_directory)
   file_list.sort()
+  print file_list
   if(len(file_list)!=0):
     f = open(solution_directory + file_list[len(file_list)-1],"r")
     line = f.readline()
