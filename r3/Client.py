@@ -125,11 +125,15 @@ def sigint_exit(signum, frame):
     print 'KILLED g_tabu_worker_thread'
     sys.exit(0)
 
-def main():
+def main(argv):
     global g_tabu_worker_thread
-
+    global server_ip
 
     signal.signal(signal.SIGINT, sigint_exit)
+
+    if len(argv) == 2:
+      server_ip = argv[1]
+      print 'server_ip =', server_ip
     
     print "Starting RamseyCoin Client..."
     print "> Trying on %s:%d" % (client_hostname, client_port)
@@ -154,4 +158,4 @@ def main():
     # time.sleep(5)
     # tw.kill_TabuWorker_threads()
 
-main()
+main(sys.argv)
