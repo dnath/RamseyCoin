@@ -54,10 +54,8 @@ def handle_PUT_SEED(c, request_message):
   data = request_message.data
   size = math.sqrt(len(data))
   
-  str_size = str(size)
   # to maintain sorting
-  if size < 10:
-    str_size = '0' + str_size
+  str_size = '%.3d' % size
   
   filename = solution_directory + solution_prefix + str_size
   file_list = list_file(solution_directory)
@@ -70,8 +68,8 @@ def handle_PUT_SEED(c, request_message):
   if filename not in file_list:
     #new solution size
     #broadcast this solution to every one
-    bcmessage = message(2,data,Id,IP,server_port)
-    broad_cast(bcmessage.get_json())
+    bc_message = message(2,data,Id,IP,server_port)
+    broad_cast(bc_message.get_json())
 
 def handle_GET_SEED(c, request_message):
   print "Recieved 'get_seed' request from client"
@@ -83,7 +81,7 @@ def handle_GET_SEED(c, request_message):
   #list solution files
   file_list = list_file(solution_directory)
   file_list.sort()
-  print file_list
+  # print file_list
   if(len(file_list)!=0):
     f = open(solution_directory + file_list[len(file_list)-1],"r")
     line = f.readline()
