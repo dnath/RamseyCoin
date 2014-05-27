@@ -58,15 +58,17 @@ def handle_request(request_json):
   response_message = message(request_json)
 
 def accept_connections():
+    s = socket.socket()
+    s.bind((host, port))
+    s.listen(1)
+    conn, addr = s.accept()
+    message_json  = ""
     while True:
-        c, addr = s.accept()     # Establish connection with client.
-        print c, addr
-        message_json = c.recv(15000)
-        print message_json
-        try:
-          thread.start_new_thread(handle_request, (message_json))
-        except:
-          print "Error: unable to start thread"
+        chunk = c.recv(1024)
+        if not chunk:
+            break
+        message_json += chunk
+    thread.start_new_thread(handle_request, (message_json))
 
 def main():
     print "Starting RamseyCoin Client..."
