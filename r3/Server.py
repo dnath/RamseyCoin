@@ -90,7 +90,7 @@ def handle_PUT_SEED(c, request_message):
   if filename not in sol_file_list:
     #new solution size
     #broadcast this solution to every one
-    bc_message = message(PUT_SEED, data=data, Id=Id, IP=IP, hostname=server_hostname, Port=server_port)
+    bc_message = message(PUT_SEED, data=data, data_size=size Id=Id, IP=IP, hostname=server_hostname, Port=server_port)
     broadcast(bc_message.get_json())
 
 def handle_GET_SEED(c, decoded_message):
@@ -107,6 +107,7 @@ def handle_GET_SEED(c, decoded_message):
   client_id = int(g_client_maxid)
   g_client_maxid_mutex.release()
 
+  print 'client_id =', client_id
   #add client to client list
   clientNode = Node(client_id, decoded_message.IP, decoded_message.Port)
 
@@ -129,7 +130,8 @@ def handle_GET_SEED(c, decoded_message):
     g_sol_file_mutex.release()
 
     # send PUT_SEED message
-    response_message = message(PUT_SEED, data=line)
+    size = int(math.sqrt(len(data)))
+    response_message = message(PUT_SEED, data=line, data_size=size, Id=client_id)
     send_msg(c, response_message.get_json())
   else:
     send_msg(c, "no counterexample available")

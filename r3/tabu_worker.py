@@ -22,6 +22,7 @@ class TabuWorker(threading.Thread):
     self.debugON = debugON
 
     gsize = int(math.sqrt(len(seed)))
+    self.current_size = gsize
     self.seed = [[ 0 if seed[i*gsize + j] == '0' else 1 for j in xrange(gsize)] for i in xrange(gsize)]
 
     # print 'seed = '
@@ -108,14 +109,13 @@ class TabuWorker(threading.Thread):
           # Print graph
           # printGraph(graph)
 
+          self.current_size = int(math.sqrt(graph))
           if self.send_seed_flag:
             self.debug('Sending new solution to server...')
             self.save_seed(graph)
           else:
             self.debug('Writing new solution...')
             self.write_solution(graph)
-
-          # TODO: Dispatch graph
 
         # This is the new seed
         seed = copy.deepcopy(graph)
@@ -214,7 +214,7 @@ class TabuWorker(threading.Thread):
       for j in xrange(gsize):
         seed += str(graph[i][j])
 
-    time.sleep(3)
+    time.sleep(2)
     request_message = message(PUT_SEED, seed, self.client_id, self.client_hostname, self.client_port)
     # Create a socket object
     s = socket.socket()

@@ -114,27 +114,30 @@ def accept_connections():
         decoded_message = message.decode(recv_message.strip())
         if decoded_message.type == PUT_SEED:
             print 'got PUT_SEED'
-            if g_tabu_worker_thread.stopped == False:
-              tw.kill_TabuWorker_threads()
-              ## blocking on  kill_TabuWorker_threads
-              while g_tabu_worker_thread.stopped == False:
-                time.sleep(1)
 
-              print 'KILLED g_tabu_worker_thread'
+            if decoded_message.data_size > g_tabu_worker_thread.current_size:
+              print 'Killing g_tabu_worker_thread as decoded_message.data_size = ', decoded_message.data_size
+              if g_tabu_worker_thread.stopped == False:
+                tw.kill_TabuWorker_threads()
+                ## blocking on  kill_TabuWorker_threads
+                while g_tabu_worker_thread.stopped == False:
+                  time.sleep(1)
 
-            else:
-              print 'g_tabu_worker_thread already stopped'
+                print 'KILLED g_tabu_worker_thread'
 
-            seed = decoded_message.data.strip()
+              else:
+                print 'g_tabu_worker_thread already stopped'
+              
+              seed = decoded_message.data.strip()
             
-            tw.init()
-            g_tabu_worker_thread = \
-              tw.TabuWorker(seed, send_seed_flag=True, 
-                            client_id=client_id, client_hostname=client_hostname, client_port=client_port, 
-                            server_host=server_host, server_port=server_port, server_ip=server_ip,
-                            numWorkers=1, maxSize=102, debugON=False, maxSkipSteps=10)
-            g_tabu_worker_thread.start()
-            print 'g_tabu_worker_thread started...'
+              tw.init()
+              g_tabu_worker_thread = \
+                tw.TabuWorker(seed, send_seed_flag=True, 
+                              client_id=client_id, client_hostname=client_hostname, client_port=client_port, 
+                              server_host=server_host, server_port=server_port, server_ip=server_ip,
+                              numWorkers=1, maxSize=102, debugON=False, maxSkipSteps=10)
+              g_tabu_worker_thread.start()
+              print 'new g_tabu_worker_thread started with seed size =', decoded_message.data_size
 
         elif decoded_message.type == HEARTBEAT:
             print "Recieved heartbeat."
