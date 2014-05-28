@@ -122,11 +122,11 @@ def handle_GET_SEED(c, decoded_message):
   c.close()
 
 def handle_request(c, recv_message):
-    print '\nmessage =\n', message
-    print
+    # print '\nmessage =\n', message
+    # print
     decoded_message = message.decode(recv_message)
-    print '\decoded_message =\n', decoded_message
-    print
+    # print '\decoded_message =\n', decoded_message
+    # print
     
     # get_seed, should be the first message from the client when it joins the system
     # get_seed
