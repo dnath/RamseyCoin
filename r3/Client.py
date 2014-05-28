@@ -51,7 +51,8 @@ def get_seed():
     print "Connecting to Server at %s:%d" % (server_host, server_port)
     s.connect((server_host, server_port))
     #send getseed request to the server
-    s.send(request_message.get_json())
+    # s.send(request_message.get_json())
+    send_msg(s, request_message.get_json())
     #receive the seed
     # recv_message  = ""
     # while True:
@@ -59,7 +60,9 @@ def get_seed():
     #   if not chunk:
     #       break
     #   recv_message += chunk
-    recv_message = s.recv(150000).strip()
+
+    # recv_message = s.recv(15000).strip()
+    recv_message = recv_msg(s)
 
     s.close()
 
@@ -96,12 +99,13 @@ def accept_connections():
     
     try:
         conn, addr = s.accept()
-        recv_message  = ""
-        while True:
-            chunk = conn.recv(1024)
-            if not chunk:
-                break
-            recv_message += chunk
+        # recv_message  = ""
+        # while True:
+        #     chunk = conn.recv(1024)
+        #     if not chunk:
+        #         break
+        #     recv_message += chunk
+        recv_message = recv_msg(s)
         
         decoded_message = message.decode(recv_message.strip())
         if decoded_message.type == PUT_SEED:
@@ -131,7 +135,7 @@ def accept_connections():
         elif decoded_message.type == HEARTBEAT:
             print "Recieved heartbeat."
             ## TODO is required
-            decoded_message = message(HEARTBEAT, data='Beep beep.', Id=client_id, IP=client_ip, hostname=client_hostname, Port=client_port)
+            # decoded_message = message(HEARTBEAT, data='Beep beep.', Id=client_id, IP=client_ip, hostname=client_hostname, Port=client_port)
 
     except:
         print sys.exc_info()

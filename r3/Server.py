@@ -128,7 +128,7 @@ def handle_GET_SEED(c, decoded_message):
     g_sol_file_mutex.release()
 
     # send PUT_SEED message
-    response_message = message (PUT_SEED, data=line)
+    response_message = message(PUT_SEED, data=line)
     c.send(response_message.get_json())
   else:
     c.send("no counterexample available")
@@ -166,12 +166,14 @@ def bind_socket(host,port):
 def accept_connections(s):
     while True:
         c, addr = s.accept()     # Establish connection with client.
-        recv_message  = ""
-        while True:
-            chunk = c.recv(1024)
-            if not chunk:
-                break
-            recv_message += chunk
+        # recv_message  = ""
+        # while True:
+        #     chunk = c.recv(1024)
+        #     if not chunk:
+        #         break
+        #     recv_message += chunk
+        # recv_message = c.recv(15000)
+        recv_message = recv_msg(s)
         # print(message_json)
         thread.start_new_thread(handle_request, (c, recv_message))
         #try:
@@ -239,7 +241,8 @@ def broadcast_with_timeout(message):
         host = socket.gethostbyaddr(client.IP)[0]
         try:
             s.connect((host, client.Port))
-            s.send(message)
+            # s.send(message)
+            send_msg(s, message)
             s.close() 
         except:
             print "Could not connect to %s:%d." % (host, client.Port)
