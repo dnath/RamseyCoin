@@ -96,6 +96,7 @@ def handle_PUT_SEED(c, request_message):
 def handle_GET_SEED(c, decoded_message):
   global g_write_mutex
   global g_client_maxid_mutex
+  global g_client_maxid
 
   print "Recieved 'get_seed' request from client"
 
