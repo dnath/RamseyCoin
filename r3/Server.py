@@ -166,7 +166,7 @@ def accept_connections(s):
         c, addr = s.accept()     # Establish connection with client.
         recv_message  = ""
         while True:
-            chunk = conn.recv(1024)
+            chunk = c.recv(1024)
             if not chunk:
                 break
             recv_message += chunk
