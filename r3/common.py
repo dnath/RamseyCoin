@@ -2,11 +2,11 @@ import os
 
 solution_prefix = "sol_"
 
-def list_sol_files(directory):
+def list_sol_files(sol_directory):
   lf = []
-  for f in os.listdir(directory):
+  for f in os.listdir(sol_directory):
     if f.startswith(solution_prefix):
-      filename = os.path.join(directory, f)
+      filename = os.path.join(sol_directory, f)
       if os.path.isfile(filename):
         lf.append(filename)
   return lf

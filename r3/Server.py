@@ -9,6 +9,7 @@ import thread
 import math
 from common import *
 import urllib2
+import threading
 
 #global variables
 
@@ -30,6 +31,8 @@ print 'server_hostname =', server_hostname
 # server_hostname = socket.gethostname() # Get local machine name
 server_port = 12345                # Reserve a port for your service.
 heartbeat_port = 12346
+
+g_file_mutex = threading.Lock()
 
 # Dictionary of client node which are running taboo search.
 # This dictionary should be saved on some presistent storage S3
@@ -56,9 +59,11 @@ def heartbeat():
         time.sleep(HEARTRATE)
 
 def handle_PUT_SEED(c, request_message):
+  global g_write_mutex
+
   print "Recieved 'save_counterexample' request from client"
   data = request_message.data
-  size = math.sqrt(len(data))
+  size = int(math.sqrt(len(data)))
   print 'size =', size
   
   # to maintain sorting
@@ -67,11 +72,16 @@ def handle_PUT_SEED(c, request_message):
   filename = os.path.join(solution_directory, solution_prefix + str_size + '.0')
   print 'filename =', filename
   sol_file_list = list_sol_files(solution_directory)
+  print sol_file_list
+  
+  g_file_mutex.acquire()
   
   f = open(filename, 'a')
   f.write(data + "\n")
   f.close()
   c.close()
+
+  g_file_mutex.release()
   
   if filename not in sol_file_list:
     #new solution size
@@ -80,6 +90,7 @@ def handle_PUT_SEED(c, request_message):
     broadcast(bc_message.get_json())
 
 def handle_GET_SEED(c, decoded_message):
+  global g_write_mutex
   print "Recieved 'get_seed' request from client"
   #add client to client list
   clientNode = Node(decoded_message.Id, decoded_message.IP, decoded_message.Port)
@@ -94,9 +105,13 @@ def handle_GET_SEED(c, decoded_message):
     filename = file_list[len(file_list)-1]
     print 'solution filename = ', filename
     
+    g_file_mutex.acquire()
+    
     f = open(filename, 'r')
     line = f.readline()
     f.close()
+    
+    g_file_mutex.release()
 
     # send PUT_SEED message
     response_message = message (PUT_SEED, data=line)
@@ -106,7 +121,11 @@ def handle_GET_SEED(c, decoded_message):
   c.close()
 
 def handle_request(c, recv_message):
+    print '\nmessage =\n', message
+    print
     decoded_message = message.decode(recv_message)
+    print '\decoded_message =\n', decoded_message
+    print
     
     # get_seed, should be the first message from the client when it joins the system
     # get_seed
@@ -135,7 +154,7 @@ def accept_connections(s):
         c, addr = s.accept()     # Establish connection with client.
         recv_message = c.recv(15000)
         # print(message_json)
-        thread.start_new_thread( handle_request, (c, recv_message))
+        thread.start_new_thread(handle_request, (c, recv_message))
         #try:
             #thread.start_new_thread( handle_request, (c, message_json))
         #except:
