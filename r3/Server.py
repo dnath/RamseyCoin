@@ -1,15 +1,15 @@
-#!/usr/bin/python           # This is server.py file
+#!/usr/bin/python           
 
-import socket               # Import socket module
+import socket 
 import time
-from json_formatter import *# Import json to object translation for counterexample class and message class 
-from os import listdir
-from os.path import isfile, join
+from json_formatter import *
+from os
 import thread
 import math
 from common import *
 import urllib2
 import threading
+
 
 #global variables
 
@@ -237,6 +237,9 @@ def broadcast(message):
             print "Could not connect to %s:%d." % (host, client.Port)
 
 def main():
+    if os.path.exists(clients_file):
+      os.remove(clients_file)
+
     print "Starting RamseyCoin Server..."
     # Start the heartbeat
     thread.start_new_thread(heartbeat, ())
