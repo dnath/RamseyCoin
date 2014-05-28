@@ -135,7 +135,7 @@ def handle_GET_SEED(c, decoded_message):
 def handle_request(c, recv_message):
     # print '\nmessage =\n', message
     # print
-    decoded_message = message.decode(recv_message)
+    decoded_message = message.decode(recv_message.strip())
     # print '\decoded_message =\n', decoded_message
     # print
     
@@ -164,7 +164,12 @@ def bind_socket(host,port):
 def accept_connections(s):
     while True:
         c, addr = s.accept()     # Establish connection with client.
-        recv_message = c.recv(15000)
+        recv_message  = ""
+        while True:
+            chunk = conn.recv(1024)
+            if not chunk:
+                break
+            recv_message += chunk
         # print(message_json)
         thread.start_new_thread(handle_request, (c, recv_message))
         #try:
@@ -213,7 +218,7 @@ def add_new_client(file_name, clientNode):
     g_client_file_mutex.acquire()
 
     fp = open(file_name, 'a')
-    clientString = clientNode.Id + "," + clientNode.IP + "," + clientNode.Port + "\n"
+    clientString = str(clientNode.Id) + "," + clientNode.IP + "," + str(clientNode.Port) + "\n"
     fp.write(clientString)
     fp.close()
 

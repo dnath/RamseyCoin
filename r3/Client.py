@@ -53,11 +53,17 @@ def get_seed():
     #send getseed request to the server
     s.send(request_message.get_json())
     #receive the seed
-    recv_message = s.recv(15000).strip()
+    recv_message  = ""
+    while True:
+      chunk = s.recv(1024)
+      if not chunk:
+          break
+      recv_message += chunk
+    # recv_message = s.recv(15000).strip()
 
     s.close()
 
-    decoded_message = message.decode(recv_message)
+    decoded_message = message.decode(recv_message.strip())
     # response_message = message(seed)
     return decoded_message.data.strip()
 
@@ -97,7 +103,7 @@ def accept_connections():
                 break
             recv_message += chunk
         
-        decoded_message = message.decode(recv_message)
+        decoded_message = message.decode(recv_message.strip())
         if decoded_message.type == PUT_SEED:
             
             if g_tabu_worker_thread.stopped == False:
