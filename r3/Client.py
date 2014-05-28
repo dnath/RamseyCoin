@@ -105,11 +105,13 @@ def accept_connections():
         #     if not chunk:
         #         break
         #     recv_message += chunk
-        recv_message = recv_msg(s)
+        recv_message = recv_msg(conn)
+
+        print 'received new seed'
         
         decoded_message = message.decode(recv_message.strip())
         if decoded_message.type == PUT_SEED:
-            
+            print 'got PUT_SEED'
             if g_tabu_worker_thread.stopped == False:
               tw.kill_TabuWorker_threads()
               ## blocking on  kill_TabuWorker_threads

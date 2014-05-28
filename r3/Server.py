@@ -257,8 +257,10 @@ def broadcast(message):
         host = socket.gethostbyaddr(client.IP)[0]
         try:
             s.connect((host, client.Port))
-            s.send(message)
+             # s.send(message)
+            send_msg(s, message)
             s.close() 
+            print 'Sent to ', client_dictionary[key].IP
         except:
             print "Could not connect to %s:%d." % (host, client.Port)
 
