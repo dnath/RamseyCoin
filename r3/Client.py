@@ -11,8 +11,9 @@ from common import *
 import signal
 import sys
 import threading
+import urllib2
 
-client_id = 2
+client_id = 0
 
 server_ip  = None
 server_port = 12345                # Reserve a port for your service.
@@ -34,7 +35,16 @@ g_sigint = False
 counter = 0 
 
 def get_seed():
-    request_message = message(0, "", client_id, client_hostname, client_port)
+    global server_ip  
+    global server_port
+    global server_host
+    
+    global client_id
+    global client_ip
+    global client_port
+    global client_hostname
+    
+    request_message = message(GET_SEED, Id=client_id, IP=client_ip, hostname=client_hostname, Port=client_port)
     s = socket.socket()         # Create a socket object
 
     #Connect to the server
@@ -43,18 +53,30 @@ def get_seed():
     #send getseed request to the server
     s.send(request_message.get_json())
     #receive the seed
-    seed = s.recv(15000).strip()
-    s.close()
-    response_message = message(seed)
-    return response_message.data.strip()
+    recv_message = s.recv(15000).strip()
 
-def bind_socket(host,port):
+    s.close()
+
+    decoded_message = message.decode(recv_message)
+    # response_message = message(seed)
+    return decoded_message.data.strip()
+
+def bind_socket(host, port):
     s = socket.socket()         # Create a socket object
     s.bind((host, port))        # Bind to the port
     s.listen(5)                 # Now wait for client connection.
 
 def accept_connections():
     global g_tabu_worker_thread
+    
+    global server_ip  
+    global server_port
+    global server_host
+    
+    global client_id
+    global client_ip
+    global client_port
+    global client_hostname
 
     # print 'accept_connections'
 
@@ -65,16 +87,18 @@ def accept_connections():
     s.settimeout(TIMEOUT)
     s.bind((client_hostname, client_port))
     s.listen(1)
+    
     try:
         conn, addr = s.accept()
-        message_json  = ""
+        recv_message  = ""
         while True:
             chunk = conn.recv(1024)
             if not chunk:
                 break
-            message_json += chunk
-        resp = message(message_json)
-        if resp.type == PUT_SEED:
+            recv_message += chunk
+        
+        decoded_message = message.decode(recv_message)
+        if decoded_message.type == PUT_SEED:
             
             if g_tabu_worker_thread.stopped == False:
               tw.kill_TabuWorker_threads()
@@ -87,7 +111,7 @@ def accept_connections():
             else:
               print 'g_tabu_worker_thread already stopped'
 
-            seed = resp.data.strip()
+            seed = decoded_message.data.strip()
             
             tw.init()
             g_tabu_worker_thread = \
@@ -98,13 +122,15 @@ def accept_connections():
             g_tabu_worker_thread.start()
             print 'g_tabu_worker_thread started...'
 
-        elif resp.type == HEARTBEAT:
+        elif decoded_message.type == HEARTBEAT:
             print "Recieved heartbeat."
-            resp = message(HEARTBEAT, "Beep beep.", client_id, client_ip, client_port)
+            ## TODO is required
+            decoded_message = message(HEARTBEAT, data='Beep beep.', Id=client_id, IP=client_ip, hostname=client_hostname, Port=client_port)
 
     except:
         print sys.exc_info()
         print "Socket timed out."
+    
     s.close()
 
 def sigint_exit(signum, frame):

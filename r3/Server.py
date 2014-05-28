@@ -18,6 +18,7 @@ clients_file = "clients.txt"
 solution_directory = "solutions/" #define solution directory where there is a file for every counterexample size.
 solution_prefix = "sol_"
 
+# server ip
 # IP = '127.0.0.1'
 try:
   IP = urllib2.urlopen('http://ip.42.pl/raw').read()
@@ -55,7 +56,8 @@ def heartbeat():
     s = socket.socket()
     while True:
         print "Sending heartbeat..."
-        bcmessage = message(HEARTBEAT, "Beep.", Id, IP, server_port)
+        # type, data='', data_size='', Id='', IP='', hostname='', Port='', client_dict=''
+        bcmessage = message(HEARTBEAT, data='Beep.', Id=Id, IP=IP, hostname=server_hostname, Port=server_port)
         broadcast_with_timeout(bcmessage.get_json())
         time.sleep(HEARTRATE)
 
@@ -79,13 +81,13 @@ def handle_PUT_SEED(c, request_message):
   if filename not in file_list:
     #new solution size
     #broadcast this solution to every one
-    bc_message = message(2,data,Id,IP,server_port)
-    broadcast(bc_message.get_json())
+    bc_message = message(PUT_SEED, data=data, Id=Id, IP=IP, hostname=server_hostname, Port=server_port)
+    # broadcast(bc_message.get_json())
 
-def handle_GET_SEED(c, request_message):
+def handle_GET_SEED(c, decoded_message):
   print "Recieved 'get_seed' request from client"
   #add client to client list
-  clientNode = Node(request_message.Id,request_message.IP,request_message.Port)
+  clientNode = Node(decoded_message.Id, decoded_message.IP, decoded_message.Port)
   client_dictionary[clientNode.Id] = clientNode
   #save clients list
   save_clients_file (clients_file, client_dictionary)
@@ -93,31 +95,35 @@ def handle_GET_SEED(c, request_message):
   file_list = list_file(solution_directory)
   file_list.sort()
   # print file_list
-  if(len(file_list)!=0):
-    f = open(solution_directory + file_list[len(file_list)-1],"r")
+  if(len(file_list) != 0):
+    filename = solution_directory + file_list[len(file_list)-1]
+    print 'solution filename = ', filename
+    
+    f = open(filename, 'r')
     line = f.readline()
     f.close()
-    response_message = message (2,line)
+
+    # send PUT_SEED message
+    response_message = message (PUT_SEED, data=line)
     c.send(response_message.get_json())
   else:
     c.send("no counterexample available")
   c.close()
 
-def handle_request(c, message_json):
-    request_message = message(message_json)
-    type = request_message.type
+def handle_request(c, recv_message):
+    decoded_message = message.decode(recv_message)
     
     # get_seed, should be the first message from the client when it joins the system
     # get_seed
-    if type == GET_SEED:
+    if decoded_message.type == GET_SEED:
       debug('handling GET_SEED')
-      handle_GET_SEED(c, request_message)  
+      handle_GET_SEED(c, decoded_message)  
 
     # save_counter_example
     # save seed == PUT_SEED in server
-    elif type == PUT_SEED: 
+    elif decoded_message.type == PUT_SEED: 
       debug('handling PUT_SEED')
-      handle_PUT_SEED(c, request_message)
+      handle_PUT_SEED(c, decoded_message)
 
     #elif type == 2: # Heartbeat acknowledgement 
 
@@ -132,9 +138,9 @@ def bind_socket(host,port):
 def accept_connections(s):
     while True:
         c, addr = s.accept()     # Establish connection with client.
-        message_json = c.recv(15000)
+        recv_message = c.recv(15000)
         # print(message_json)
-        thread.start_new_thread( handle_request, (c, message_json))
+        thread.start_new_thread( handle_request, (c, recv_message))
         #try:
             #thread.start_new_thread( handle_request, (c, message_json))
         #except:
