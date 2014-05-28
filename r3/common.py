@@ -33,7 +33,7 @@ def recvall(sock, n):
     if not packet:
       return None
     data += packet
- return data
+  return data
 
 
 GET_SEED = 0
