@@ -56,8 +56,8 @@ def heartbeat():
     while True:
         print "Sending heartbeat..."
         bcmessage = message(HEARTBEAT, "Beep.", Id, IP, server_port)
-        broad_cast(bcmessage.get_json())
-        time.sleep(60)
+        broadcast_with_timeout(bcmessage.get_json())
+        time.sleep(HEARTRATE)
 
 def handle_PUT_SEED(c, request_message):
   print "Recieved 'save_counterexample' request from client"
@@ -80,7 +80,7 @@ def handle_PUT_SEED(c, request_message):
     #new solution size
     #broadcast this solution to every one
     bc_message = message(2,data,Id,IP,server_port)
-    broad_cast(bc_message.get_json())
+    broadcast(bc_message.get_json())
 
 def handle_GET_SEED(c, request_message):
   print "Recieved 'get_seed' request from client"
@@ -133,7 +133,7 @@ def accept_connections(s):
     while True:
         c, addr = s.accept()     # Establish connection with client.
         message_json = c.recv(15000)
-        print(message_json)
+        # print(message_json)
         thread.start_new_thread( handle_request, (c, message_json))
         #try:
             #thread.start_new_thread( handle_request, (c, message_json))
@@ -174,7 +174,21 @@ def add_new_client(file_name, client):
     fp.write(clientString)
     fp.close()
 
-def broad_cast(message):
+def broadcast_with_timeout(message):
+    # print 'Broadcast...\n', message 
+    for key in client_dictionary.keys():
+        client = client_dictionary[key]
+        s = socket.socket()         # Create a socket object
+        s.settimeout(TIMEOUT)
+        host = socket.gethostbyaddr(client.IP)[0]
+        try:
+            s.connect((host, client.Port))
+            s.send(message)
+            s.close() 
+        except:
+            print "Could not connect to %s:%d." % (host, client.Port)
+
+def broadcast(message):
     # print 'Broadcast...\n', message 
     for key in client_dictionary.keys():
         client = client_dictionary[key]

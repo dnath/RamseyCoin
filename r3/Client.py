@@ -101,10 +101,9 @@ def accept_connections():
         elif resp.type == HEARTBEAT:
             print "Recieved heartbeat."
             resp = message(HEARTBEAT, "Beep beep.", client_id, client_ip, client_port)
-            s.send(resp.get_json())
-            print "Sent heartbeat ACK."
 
     except:
+        print sys.exc_info()
         print "Socket timed out."
     s.close()
 
