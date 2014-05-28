@@ -129,9 +129,9 @@ def handle_GET_SEED(c, decoded_message):
 
     # send PUT_SEED message
     response_message = message(PUT_SEED, data=line)
-    c.send(response_message.get_json())
+    send_msg(c, response_message.get_json())
   else:
-    c.send("no counterexample available")
+    send_msg(c, "no counterexample available")
   c.close()
 
 def handle_request(c, recv_message):
@@ -173,7 +173,7 @@ def accept_connections(s):
         #         break
         #     recv_message += chunk
         # recv_message = c.recv(15000)
-        recv_message = recv_msg(s)
+        recv_message = recv_msg(c)
         # print(message_json)
         thread.start_new_thread(handle_request, (c, recv_message))
         #try:
