@@ -109,7 +109,7 @@ class TabuWorker(threading.Thread):
           # Print graph
           # printGraph(graph)
 
-          self.current_size = int(math.sqrt(len(graph)))
+          self.current_size = len(graph)
           if self.send_seed_flag:
             self.debug('Sending new solution to server...')
             self.save_seed(graph)
