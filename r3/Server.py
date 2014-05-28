@@ -15,8 +15,7 @@ import urllib2
 DEBUG = True
 Id = 1
 clients_file = "clients.txt"
-solution_directory = "solutions/" #define solution directory where there is a file for every counterexample size.
-solution_prefix = "sol_"
+solution_directory = "solutions" #define solution directory where there is a file for every counterexample size.
 
 # server ip
 # IP = '127.0.0.1'
@@ -48,15 +47,10 @@ class Node:
         self.IP = IP
         self.Port = Port
 
-def list_file(directory):
-    onlyfiles = [ f for f in listdir(directory) if isfile(join(directory,f)) ]
-    return onlyfiles
-
 def heartbeat():
     s = socket.socket()
     while True:
         print "Sending heartbeat..."
-        # type, data='', data_size='', Id='', IP='', hostname='', Port='', client_dict=''
         bcmessage = message(HEARTBEAT, data='Beep.', Id=Id, IP=IP, hostname=server_hostname, Port=server_port)
         broadcast_with_timeout(bcmessage.get_json())
         time.sleep(HEARTRATE)
@@ -65,24 +59,25 @@ def handle_PUT_SEED(c, request_message):
   print "Recieved 'save_counterexample' request from client"
   data = request_message.data
   size = math.sqrt(len(data))
+  print 'size =', size
   
   # to maintain sorting
   str_size = '%.3d' % size
   
-  filename = solution_directory + solution_prefix + str_size + '.0'
-  # print filename
-  file_list = list_file(solution_directory)
+  filename = os.path.join(solution_directory, solution_prefix + str_size + '.0')
+  print 'filename =', filename
+  sol_file_list = list_sol_files(solution_directory)
   
   f = open(filename, 'a')
   f.write(data + "\n")
   f.close()
   c.close()
   
-  if filename not in file_list:
+  if filename not in sol_file_list:
     #new solution size
     #broadcast this solution to every one
     bc_message = message(PUT_SEED, data=data, Id=Id, IP=IP, hostname=server_hostname, Port=server_port)
-    # broadcast(bc_message.get_json())
+    broadcast(bc_message.get_json())
 
 def handle_GET_SEED(c, decoded_message):
   print "Recieved 'get_seed' request from client"
@@ -92,11 +87,11 @@ def handle_GET_SEED(c, decoded_message):
   #save clients list
   save_clients_file (clients_file, client_dictionary)
   #list solution files
-  file_list = list_file(solution_directory)
+  file_list = list_sol_files(solution_directory)
   file_list.sort()
   # print file_list
   if(len(file_list) != 0):
-    filename = solution_directory + file_list[len(file_list)-1]
+    filename = file_list[len(file_list)-1]
     print 'solution filename = ', filename
     
     f = open(filename, 'r')

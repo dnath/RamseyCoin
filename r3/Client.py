@@ -187,7 +187,7 @@ def main(argv):
         tw.TabuWorker(seed, send_seed_flag=True, 
                       client_id=client_id, client_hostname=client_hostname, client_port=client_port, 
                       server_host=server_host, server_port=server_port, server_ip=server_ip,
-                      numWorkers=1, maxSize=102, debugON=False, maxSkipSteps=10)
+                      numWorkers=10, maxSize=102, debugON=False, maxSkipSteps=10)
     g_tabu_worker_thread.start()
 
     # now listen for messages from Server

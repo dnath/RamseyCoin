@@ -242,8 +242,8 @@ def kill_TabuWorker_threads():
   g_kill_flag = True
   g_kill_mutex.release()
 
-  print 'Kill All'
-  print 'END'
+  # print 'Kill All'
+  # print 'END'
 
 if __name__ == '__main__':
 
