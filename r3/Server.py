@@ -8,6 +8,7 @@ from os.path import isfile, join
 import thread
 import math
 from common import *
+import urllib2
 
 #global variables
 
@@ -16,8 +17,17 @@ Id = 1
 clients_file = "clients.txt"
 solution_directory = "solutions/" #define solution directory where there is a file for every counterexample size.
 solution_prefix = "sol_"
-IP = "127.0.0.1"
-server_hostname = socket.gethostname() # Get local machine name
+
+# IP = '127.0.0.1'
+try:
+  IP = urllib2.urlopen('http://ip.42.pl/raw').read()
+except:
+  IP = '127.0.0.1'
+
+print 'server ip =', IP
+server_hostname = socket.gethostbyaddr(IP)[0]
+print 'server_hostname =', server_hostname
+# server_hostname = socket.gethostname() # Get local machine name
 server_port = 12345                # Reserve a port for your service.
 heartbeat_port = 12346
 

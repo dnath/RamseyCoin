@@ -14,13 +14,20 @@ import threading
 
 client_id = 2
 
-server_ip  = "127.0.0.1"
+server_ip  = None
 server_port = 12345                # Reserve a port for your service.
-server_host = socket.gethostbyaddr(server_ip)[0]  #Get server hostname, it returns an array with the hostname in the first element
+server_host = None  #Get server hostname, it returns an array with the hostname in the first element
 
 client_port = 12500
-client_hostname = socket.gethostname()
-client_ip = socket.gethostbyname(client_hostname)
+try:
+  client_ip = urllib2.urlopen('http://ip.42.pl/raw').read()
+except:
+  client_ip = '127.0.0.1'
+client_hostname = socket.gethostbyaddr(client_ip)[0]
+
+print 'client_ip = ', client_ip
+print 'client_hostname =', client_hostname
+
 g_tabu_worker_thread = None
 g_sigint = False
 
@@ -128,12 +135,19 @@ def sigint_exit(signum, frame):
 def main(argv):
     global g_tabu_worker_thread
     global server_ip
+    global server_host
 
     signal.signal(signal.SIGINT, sigint_exit)
 
     if len(argv) == 2:
       server_ip = argv[1]
-      print 'server_ip =', server_ip
+    else:
+      print 'Defaulting server_ip to 127.0.0.1'
+      server_ip = '127.0.0.1'
+
+    server_host = socket.gethostbyaddr(server_ip)[0]
+    print 'server_ip =', server_ip
+    print 'server_host =', server_host
     
     print "Starting RamseyCoin Client..."
     print "> Trying on %s:%d" % (client_hostname, client_port)
