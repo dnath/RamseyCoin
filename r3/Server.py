@@ -71,9 +71,9 @@ def handle_PUT_SEED(c, request_message):
   str_size = '%.3d' % size
   
   filename = os.path.join(solution_directory, solution_prefix + str_size + '.0')
-  print 'filename =', filename
+  print '\nfilename =', filename
   sol_file_list = list_sol_files(solution_directory)
-  print sol_file_list
+  # print sol_file_list
   
   g_sol_file_mutex.acquire()
   
@@ -97,14 +97,14 @@ def handle_GET_SEED(c, decoded_message):
   clientNode = Node(decoded_message.Id, decoded_message.IP, decoded_message.Port)
   client_dictionary[clientNode.Id] = clientNode
   #save clients list
-  save_clients_file (clients_file, client_dictionary)
+  add_new_client(clients_file, client_dictionary)
   #list solution files
   file_list = list_sol_files(solution_directory)
   file_list.sort()
   # print file_list
   if(len(file_list) != 0):
     filename = file_list[len(file_list)-1]
-    print 'solution filename = ', filename
+    print '\nsolution filename = ', filename
     
     g_sol_file_mutex.acquire()
     
@@ -190,7 +190,7 @@ def save_clients_file(file_name,clients):
 
     for key in clients.keys():
         clientObject = clients[key]
-        clientString = str(clientObject.Id)+","+clientObject.IP+","+str(clientObject.Port)+"\n"
+        clientString = str(clientObject.Id) + "," + clientObject.IP + "," + str(clientObject.Port) + "\n"
         fp.write(clientString)
     fp.close()
 
@@ -202,7 +202,7 @@ def add_new_client(file_name, client):
     g_client_file_mutex.acquire()
 
     fp = open(file_name,"a")
-    clientString = clientObject.Id+","+clientObject.IP+","+clientObject.Port+"\n"
+    clientString = clientObject.Id + "," + clientObject.IP + "," + clientObject.Port + "\n"
     fp.write(clientString)
     fp.close()
 
@@ -236,7 +236,7 @@ def broadcast(message):
         except:
             print "Could not connect to %s:%d." % (host, client.Port)
 
-def main ():
+def main():
     print "Starting RamseyCoin Server..."
     # Start the heartbeat
     thread.start_new_thread(heartbeat, ())
