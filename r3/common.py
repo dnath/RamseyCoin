@@ -1,4 +1,5 @@
 import os
+import struct
 
 solution_prefix = "sol_"
 
