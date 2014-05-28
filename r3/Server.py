@@ -3,7 +3,7 @@
 import socket 
 import time
 from json_formatter import *
-from os
+import os
 import thread
 import math
 from common import *
@@ -34,6 +34,9 @@ heartbeat_port = 12346
 
 g_sol_file_mutex = threading.Lock()
 g_client_file_mutex = threading.Lock()
+g_client_maxid_mutex = threading.Lock()
+
+g_client_maxid = 0
 
 # Dictionary of client node which are running taboo search.
 # This dictionary should be saved on some presistent storage S3
@@ -92,12 +95,19 @@ def handle_PUT_SEED(c, request_message):
 
 def handle_GET_SEED(c, decoded_message):
   global g_write_mutex
+  global g_client_maxid_mutex
+
   print "Recieved 'get_seed' request from client"
+
+  g_client_maxid_mutex.acquire()
+  g_client_maxid += 1
+  g_client_maxid_mutex.release()
+
   #add client to client list
-  clientNode = Node(decoded_message.Id, decoded_message.IP, decoded_message.Port)
-  client_dictionary[clientNode.Id] = clientNode
+  clientNode = Node(g_client_maxid, decoded_message.IP, decoded_message.Port)
+
   #save clients list
-  add_new_client(clients_file, client_dictionary)
+  add_new_client(clients_file, clientNode)
   #list solution files
   file_list = list_sol_files(solution_directory)
   file_list.sort()
@@ -167,7 +177,7 @@ def accept_connections(s):
 def read_clients_file(file_name):
     g_client_file_mutex.acquire()
 
-    fp = open(file_name,"r")
+    fp = open(file_name, 'r')
     #line in the form, clientID, IP and Port
     clientStrings = fp.readlines()
     fp.close()
@@ -177,13 +187,13 @@ def read_clients_file(file_name):
     clients = {}
     for clientString in clientStrings:
         clientStringPart = clientString.split(",")
-        client = Node(clientStringPart[0],clientStringPart[1],clientStringPart[2])
-        clients [client.Id] = client
+        client = Node(clientStringPart[0], clientStringPart[1], clientStringPart[2])
+        clients[client.Id] = client
 
     return clients
 
 #Save clients' connection data to clients file
-def save_clients_file(file_name,clients):
+def save_clients_file(file_name, clients):
     g_client_file_mutex.acquire()
 
     fp = open(file_name,"w")
@@ -198,11 +208,11 @@ def save_clients_file(file_name,clients):
 
 #not used
 #Add new client connection data to clients file
-def add_new_client(file_name, client):
+def add_new_client(file_name, clientNode):
     g_client_file_mutex.acquire()
 
-    fp = open(file_name,"a")
-    clientString = clientObject.Id + "," + clientObject.IP + "," + clientObject.Port + "\n"
+    fp = open(file_name, 'a')
+    clientString = clientNode.Id + "," + clientNode.IP + "," + clientNode.Port + "\n"
     fp.write(clientString)
     fp.close()
 
