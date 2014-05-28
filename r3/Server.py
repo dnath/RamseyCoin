@@ -32,7 +32,8 @@ print 'server_hostname =', server_hostname
 server_port = 12345                # Reserve a port for your service.
 heartbeat_port = 12346
 
-g_file_mutex = threading.Lock()
+g_sol_file_mutex = threading.Lock()
+g_client_file_mutex = threading.Lock()
 
 # Dictionary of client node which are running taboo search.
 # This dictionary should be saved on some presistent storage S3
@@ -74,14 +75,14 @@ def handle_PUT_SEED(c, request_message):
   sol_file_list = list_sol_files(solution_directory)
   print sol_file_list
   
-  g_file_mutex.acquire()
+  g_sol_file_mutex.acquire()
   
   f = open(filename, 'a')
   f.write(data + "\n")
   f.close()
   c.close()
 
-  g_file_mutex.release()
+  g_sol_file_mutex.release()
   
   if filename not in sol_file_list:
     #new solution size
@@ -105,13 +106,13 @@ def handle_GET_SEED(c, decoded_message):
     filename = file_list[len(file_list)-1]
     print 'solution filename = ', filename
     
-    g_file_mutex.acquire()
+    g_sol_file_mutex.acquire()
     
     f = open(filename, 'r')
     line = f.readline()
     f.close()
     
-    g_file_mutex.release()
+    g_sol_file_mutex.release()
 
     # send PUT_SEED message
     response_message = message (PUT_SEED, data=line)
@@ -164,10 +165,15 @@ def accept_connections(s):
 
 # Read clients' connection data from file to a dictionary
 def read_clients_file(file_name):
+    g_client_file_mutex.acquire()
+
     fp = open(file_name,"r")
     #line in the form, clientID, IP and Port
     clientStrings = fp.readlines()
     fp.close()
+
+    g_client_file_mutex.release()
+
     clients = {}
     for clientString in clientStrings:
         clientStringPart = clientString.split(",")
@@ -178,6 +184,8 @@ def read_clients_file(file_name):
 
 #Save clients' connection data to clients file
 def save_clients_file(file_name,clients):
+    g_client_file_mutex.acquire()
+
     fp = open(file_name,"w")
 
     for key in clients.keys():
@@ -186,13 +194,19 @@ def save_clients_file(file_name,clients):
         fp.write(clientString)
     fp.close()
 
+    g_client_file_mutex.release()
+
 #not used
 #Add new client connection data to clients file
 def add_new_client(file_name, client):
+    g_client_file_mutex.acquire()
+
     fp = open(file_name,"a")
     clientString = clientObject.Id+","+clientObject.IP+","+clientObject.Port+"\n"
     fp.write(clientString)
     fp.close()
+
+    g_client_file_mutex.release()
 
 def broadcast_with_timeout(message):
     # print 'Broadcast...\n', message 
@@ -211,6 +225,7 @@ def broadcast_with_timeout(message):
 def broadcast(message):
     # print 'Broadcast...\n', message 
     for key in client_dictionary.keys():
+        print 'Sending to ', client_dictionary[key].IP
         client = client_dictionary[key]
         s = socket.socket()         # Create a socket object
         host = socket.gethostbyaddr(client.IP)[0]
