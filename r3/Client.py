@@ -53,13 +53,13 @@ def get_seed():
     #send getseed request to the server
     s.send(request_message.get_json())
     #receive the seed
-    recv_message  = ""
-    while True:
-      chunk = s.recv(1024)
-      if not chunk:
-          break
-      recv_message += chunk
-    # recv_message = s.recv(15000).strip()
+    # recv_message  = ""
+    # while True:
+    #   chunk = s.recv(1024)
+    #   if not chunk:
+    #       break
+    #   recv_message += chunk
+    recv_message = s.recv(150000).strip()
 
     s.close()
 

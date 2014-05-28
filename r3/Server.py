@@ -100,12 +100,14 @@ def handle_GET_SEED(c, decoded_message):
 
   print "Recieved 'get_seed' request from client"
 
+  client_id = 0
   g_client_maxid_mutex.acquire()
   g_client_maxid += 1
+  client_id = int(g_client_maxid)
   g_client_maxid_mutex.release()
 
   #add client to client list
-  clientNode = Node(g_client_maxid, decoded_message.IP, decoded_message.Port)
+  clientNode = Node(client_id, decoded_message.IP, decoded_message.Port)
 
   #add new client
   add_new_client(clients_file, clientNode)
