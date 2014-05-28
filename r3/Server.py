@@ -107,7 +107,7 @@ def handle_GET_SEED(c, decoded_message):
   #add client to client list
   clientNode = Node(g_client_maxid, decoded_message.IP, decoded_message.Port)
 
-  #save clients list
+  #add new client
   add_new_client(clients_file, clientNode)
   #list solution files
   file_list = list_sol_files(solution_directory)
@@ -215,8 +215,11 @@ def save_clients_file(file_name, clients):
 #not used
 #Add new client connection data to clients file
 def add_new_client(file_name, clientNode):
-    g_client_file_mutex.acquire()
+    global client_dictionary
 
+    g_client_file_mutex.acquire()
+    
+    client_dictionary[clientNode.Id] = clientNode
     fp = open(file_name, 'a')
     clientString = str(clientNode.Id) + "," + clientNode.IP + "," + str(clientNode.Port) + "\n"
     fp.write(clientString)
@@ -225,6 +228,7 @@ def add_new_client(file_name, clientNode):
     g_client_file_mutex.release()
 
 def broadcast_with_timeout(message):
+    global client_dictionary
     # print 'Broadcast...\n', message 
     for key in client_dictionary.keys():
         client = client_dictionary[key]
@@ -239,6 +243,7 @@ def broadcast_with_timeout(message):
             print "Could not connect to %s:%d." % (host, client.Port)
 
 def broadcast(message):
+    global client_dictionary
     # print 'Broadcast...\n', message 
     for key in client_dictionary.keys():
         print 'Sending to ', client_dictionary[key].IP
