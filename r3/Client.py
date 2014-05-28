@@ -114,7 +114,9 @@ def accept_connections():
         decoded_message = message.decode(recv_message.strip())
         if decoded_message.type == PUT_SEED:
             print 'got PUT_SEED'
-
+            print '\ndecoded_message.data_size  =', decoded_message.data_size 
+            print 'g_tabu_worker_thread.current_size = ', g_tabu_worker_thread.current_size
+            print 
             if decoded_message.data_size > g_tabu_worker_thread.current_size:
               print 'Killing g_tabu_worker_thread as decoded_message.data_size = ', decoded_message.data_size
               if g_tabu_worker_thread.stopped == False:
