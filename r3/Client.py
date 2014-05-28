@@ -68,6 +68,8 @@ def get_seed():
 
     decoded_message = message.decode(recv_message.strip())
     # response_message = message(seed)
+    client_id = decoded_message.Id
+    print 'client_id =', client_id
     return decoded_message.data.strip()
 
 def bind_socket(host, port):

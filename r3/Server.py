@@ -101,6 +101,7 @@ def handle_GET_SEED(c, decoded_message):
   print "Recieved 'get_seed' request from client"
 
   client_id = 0
+  
   g_client_maxid_mutex.acquire()
   g_client_maxid += 1
   client_id = int(g_client_maxid)
