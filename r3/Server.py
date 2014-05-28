@@ -130,7 +130,7 @@ def handle_GET_SEED(c, decoded_message):
     g_sol_file_mutex.release()
 
     # send PUT_SEED message
-    size = int(math.sqrt(len(data)))
+    size = int(math.sqrt(len(line)))
     response_message = message(PUT_SEED, data=line, data_size=size, Id=client_id)
     send_msg(c, response_message.get_json())
   else:
