@@ -218,13 +218,16 @@ class TabuWorker(threading.Thread):
     request_message = message(PUT_SEED, seed, self.client_id, self.client_hostname, self.client_port)
     # Create a socket object
     s = socket.socket()
-    # Get server hostname, it returns an array with the hostname in the first element
-    server_host = socket.gethostbyaddr(self.server_ip)[0] 
-    # Connect to the server
-    s.connect((self.server_host, self.server_port))
-    # send getseed request to the server
-    send_msg(s, request_message.get_json())
-    s.close()
+    try:
+      # Get server hostname, it returns an array with the hostname in the first element
+      server_host = socket.gethostbyaddr(self.server_ip)[0] 
+      # Connect to the server
+      s.connect((self.server_host, self.server_port))
+      # send getseed request to the server
+      send_msg(s, request_message.get_json())
+      s.close()
+    except:
+      print sys.exc_info()
 
     self.debug('seed of size = ' + str(gsize) + ' sent')
 
