@@ -34,6 +34,28 @@ g_sigint = False
 
 counter = 0 
 
+serverDown = False
+stopClaim = False
+
+client_dictionary = {}
+
+def broadcast(message):
+    global client_dictionary
+    # print 'Broadcast...\n', message 
+    for key in client_dictionary.keys():
+        print 'Sending to ', client_dictionary[key].IP
+        client = client_dictionary[key]
+        s = socket.socket()         # Create a socket object
+        host = socket.gethostbyaddr(client.IP)[0]
+        try:
+            s.connect((host, client.Port))
+            s.send(message)
+            s.close() 
+        except:
+            print "Could not connect to %s:%d." % (host, client.Port)
+
+
+
 def get_seed():
     global server_ip  
     global server_port
@@ -88,6 +110,8 @@ def accept_connections():
     global client_ip
     global client_port
     global client_hostname
+
+    global serverDown
 
     # print 'accept_connections'
 
@@ -146,11 +170,40 @@ def accept_connections():
             ## TODO is required
             # decoded_message = message(HEARTBEAT, data='Beep beep.', Id=client_id, IP=client_ip, hostname=client_hostname, Port=client_port)
 
+        elif decoded_message.type == CLAIM:
+            if decoded_message.Id < client_id:
+                stopMsg  = message(STOP, data='You certainly aren\'t!', Id=client_id, IP=client_ip, hostname=client_hostname, Port=client_port)
+                conn.send(stopMsg.get_json())
+                conn.close()
+
+        elif decoded_message.type == STOP:
+            stopClaim = True
+
+        elif decoded_message.type == ELECT:
+            server_ip  = decoded_message.IP
+            server_host = socket.gethostbyaddr(server_ip)[0]
+            serverDown = False
+
     except:
+        # did not receive any stops, I am leader
+        if serverDown:
+            electMsg = message(ELECT, data='I am lord of Winterfell.', Id=client_id, IP=client_ip, hostname=client_hostname, Port=client_port)
+            broadcast(electMsg.get_json())
+            return False
+        # Detected server outage
+        else:
+            serverDown = True
+            if stopClaim:
+                claimMsg = message(ELECT, data='Who is lord of Winterfell?', Id=client_id, IP=client_ip, hostname=client_hostname, Port=client_port)
+                broadcast(claimMsg.get_json())
+
+
+
         print sys.exc_info()
         print "Socket timed out."
     
     s.close()
+    return True
 
 def sigint_exit(signum, frame):
   global g_sigint
@@ -210,8 +263,9 @@ def main(argv):
     g_tabu_worker_thread.start()
 
     # now listen for messages from Server
-    while True:
-        accept_connections()
+    cont = True
+    while cont:
+        cont = accept_connections()
     
     # time.sleep(5)
     # tw.kill_TabuWorker_threads()

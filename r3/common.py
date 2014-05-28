@@ -40,6 +40,9 @@ def recvall(sock, n):
 GET_SEED = 0
 PUT_SEED = 1
 HEARTBEAT = 2
+CLAIM = 3
+STOP = 4
+ELECT = 5
 
 HEARTRATE = 60
 TIMEOUT = 181
