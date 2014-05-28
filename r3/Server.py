@@ -90,7 +90,7 @@ def handle_PUT_SEED(c, request_message):
   if filename not in sol_file_list:
     #new solution size
     #broadcast this solution to every one
-    bc_message = message(PUT_SEED, data=data, data_size=size Id=Id, IP=IP, hostname=server_hostname, Port=server_port)
+    bc_message = message(PUT_SEED, data=data, data_size=size, IP=IP, hostname=server_hostname, Port=server_port)
     broadcast(bc_message.get_json())
 
 def handle_GET_SEED(c, decoded_message):
