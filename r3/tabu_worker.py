@@ -222,7 +222,7 @@ class TabuWorker(threading.Thread):
     #Connect to the server
     s.connect((self.server_host, self.server_port))
     #send getseed request to the server
-    s.send(request_message.get_json())
+    send_msg(s, request_message.get_json())
     s.close()
 
     self.debug('seed of size = ' + str(gsize) + ' sent')
