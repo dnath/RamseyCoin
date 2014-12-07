@@ -1,10 +1,11 @@
 #!/usr/bin/python           # This is client.py file
 
 import socket               # Import socket module
-from json_formatter import *# Import json to object translation for counterexample class and message class 
-from Tabu import tabu
 import thread
 import math
+
+from Tabu import tabu
+
 
 client_id = 2
 server_ip  = "127.0.1.1"

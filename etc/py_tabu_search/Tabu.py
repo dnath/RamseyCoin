@@ -25,11 +25,13 @@
 # Modules
 #
 import copy
-import OrderedSet
 import pickle
 import random
 import sys
 import time
+
+import OrderedSet
+
 #
 ######################################################################
 

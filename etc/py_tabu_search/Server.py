@@ -1,7 +1,6 @@
 #!/usr/bin/python           # This is server.py file
 
 import socket               # Import socket module
-from json_formatter import *# Import json to object translation for counterexample class and message class 
 from os import listdir
 from os.path import isfile, join
 import thread
