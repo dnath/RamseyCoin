@@ -1,7 +1,7 @@
 #!/usr/bin/python           # This is client.py file
 
 import socket               # Import socket module
-from json_formatter import *# Import json to object translation for counterexample class and message class 
+from messaging import *
 from tabu import tabu
 import thread
 import math
@@ -44,7 +44,7 @@ def get_seed():
     global client_port
     global client_hostname
     
-    request_message = message(GET_SEED, Id=client_id, IP=client_ip, hostname=client_hostname, Port=client_port)
+    request_message = Message(GET_SEED, Id=client_id, IP=client_ip, hostname=client_hostname, Port=client_port)
     s = socket.socket()         # Create a socket object
 
     #Connect to the server
@@ -66,7 +66,7 @@ def get_seed():
 
     s.close()
 
-    decoded_message = message.decode(recv_message.strip())
+    decoded_message = Message.decode(recv_message.strip())
     # response_message = message(seed)
     client_id = decoded_message.Id
     print 'client_id =', client_id
@@ -111,7 +111,7 @@ def accept_connections():
 
         print 'received new seed'
         
-        decoded_message = message.decode(recv_message.strip())
+        decoded_message = Message.decode(recv_message.strip())
         if decoded_message.type == PUT_SEED:
             print 'got PUT_SEED'
             print '\ndecoded_message.data_size  =', decoded_message.data_size 

@@ -27,7 +27,7 @@ class CounterExample:
 
 
 
-class message:
+class Message:
   @staticmethod
   def decode(encoded_message):
     json_obj = json.loads(encoded_message)
@@ -38,7 +38,7 @@ class message:
     else:
       data_size = int(json_obj["data_size"])
     
-    return message(msg_type, data=json_obj["data"], data_size=data_size, 
+    return Message(msg_type, data=json_obj["data"], data_size=data_size,
                               Id=json_obj["Id"], IP=json_obj["IP"], hostname=json_obj["hostname"], Port=json_obj["Port"],
                               client_dict=json_obj["client_dict"])
 
@@ -77,9 +77,9 @@ class message:
     return self.get_json()
 
 if __name__ == '__main__':
-  m = message(GET_SEED, data='100100101', data_size=3, Id='121', IP='127.0.1.1', hostname='local', Port=12443, client_dict={'d':'1'})
+  m = Message(GET_SEED, data='100100101', data_size=3, Id='121', IP='127.0.1.1', hostname='local', Port=12443, client_dict={'d':'1'})
   print m
 
   msg_string = str(m)
-  m1 = message.decode(msg_string)
+  m1 = Message.decode(msg_string)
   print m1

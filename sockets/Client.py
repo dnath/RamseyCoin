@@ -17,7 +17,7 @@ counter = 0
 
 
 def get_seed():
-    request_message = message(0,"",client_id,client_hostname,client_port)
+    request_message = Message(0,"",client_id,client_hostname,client_port)
     s = socket.socket()         # Create a socket object
 
     #Get server hostname, it returns an array with the hostname in the first element
@@ -30,12 +30,12 @@ def get_seed():
     #receive the seed
     seed = s.recv(15000).strip()
     s.close()
-    response_message = message(seed)
+    response_message = Message(seed)
     return response_message.data.strip()
 
 
 def save_seed(seed):
-    request_message = message(1,seed,client_id,client_hostname,client_port)
+    request_message = Message(1,seed,client_id,client_hostname,client_port)
     s = socket.socket()         # Create a socket object
     #Get server hostname, it returns an array with the hostname in the first element
     server_host = socket.gethostbyaddr(server_ip)[0] 
@@ -53,7 +53,7 @@ def bind_socket(host,port):
 
 #handle requests from the server
 def handle_request(request_json):
-    response_message = message(request_json)
+    response_message = Message(request_json)
 
 def accept_connections():
     while True:

@@ -1,7 +1,7 @@
 #!/usr/bin/python           # This is server.py file
 
 import socket               # Import socket module
-from json_formatter import *# Import json to object translation for counterexample class and message class 
+from messaging import *
 from os import listdir
 from os.path import isfile, join
 import thread
@@ -52,7 +52,7 @@ def handle_PUT_SEED(c, request_message):
   if filename not in file_list:
     #new solution size
     #broadcast this solution to every one
-    bcmessage = message(2,data,Id,IP,server_port)
+    bcmessage = Message(2,data,Id,IP,server_port)
     broad_cast(bcmessage)
 
 def handle_GET_SEED(c, request_message):
@@ -69,14 +69,14 @@ def handle_GET_SEED(c, request_message):
     f = open(solution_directory + file_list[len(file_list)-1],"r")
     line = f.readline()
     f.close()
-    response_message = message (2,line)
+    response_message = Message (2,line)
     c.send(response_message.get_json())
   else:
     c.send("no counterexample available")
   c.close()
 
 def handle_request(c, message_json):
-    request_message = message(message_json)
+    request_message = Message(message_json)
     type = request_message.type
 
     # get_seed, should be the first message from the client when it joins the system
@@ -140,7 +140,7 @@ def save_clients_file(file_name,clients):
 
 #not used
 #Add new client connection data to clients file
-def add_new_client(file_name, client):
+def add_new_client(file_name, clientObject):
     fp = open(file_name,"a")
     clientString = clientObject.Id+","+clientObject.IP+","+clientObject.Port+"\n"
     fp.write(clientString)
@@ -176,7 +176,7 @@ def main ():
       line = f.readline()
       f.close()
       
-      response_message = message (PUT_SEED, line)
+      response_message = Message (PUT_SEED, line)
       s.send(response_message.get_json())
     
     else:

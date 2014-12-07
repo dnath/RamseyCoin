@@ -149,7 +149,6 @@ double CliqueCountG(int *g, int gsize, double *countg)
                         }
                       }
                   }
-
                 }
               }
             }

@@ -33,7 +33,7 @@ def list_file(directory):
     return onlyfiles
 
 def handle_request(c, message_json):
-    request_message = message(message_json)
+    request_message = Message(message_json)
     type = request_message.type
 
     #get_seed, should be the first message from the client when it joins the system
@@ -51,7 +51,7 @@ def handle_request(c, message_json):
             f = open(solution_directory + file_list[len(file_list)-1],"r")
             line = f.readline()
             f.close()
-            response_message = message (2,line)
+            response_message = Message (2,line)
             c.send(response_message.get_json())
         else:
             c.send("no counterexample available")
@@ -69,7 +69,7 @@ def handle_request(c, message_json):
         if filename not in file_list:
             #new solution size
             #broadcast this solution to every one
-            bcmessage = message(2,data,Id,IP,server_port)
+            bcmessage = Message(2,data,Id,IP,server_port)
             broad_cast(bcmessage)
     #elif type == 2: # Heartbeat acknowledgement 
 

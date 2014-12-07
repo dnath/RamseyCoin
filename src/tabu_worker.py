@@ -4,7 +4,7 @@ import sys
 import random
 import os
 import math
-from json_formatter import *
+from messaging import *
 import socket
 from tabu import *
 from common import *
@@ -215,7 +215,7 @@ class TabuWorker(threading.Thread):
         seed += str(graph[i][j])
 
     time.sleep(2)
-    request_message = message(PUT_SEED, seed, self.client_id, self.client_hostname, self.client_port)
+    request_message = Message(PUT_SEED, seed, self.client_id, self.client_hostname, self.client_port)
     # Create a socket object
     s = socket.socket()
     try:

@@ -58,7 +58,7 @@ def heartbeat():
     s = socket.socket()
     while True:
         print "Sending heartbeat..."
-        bcmessage = message(HEARTBEAT, data='Beep.', Id=Id, IP=IP, hostname=server_hostname, Port=server_port)
+        bcmessage = Message(HEARTBEAT, data='Beep.', Id=Id, IP=IP, hostname=server_hostname, Port=server_port)
         broadcast_with_timeout(bcmessage.get_json())
         time.sleep(HEARTRATE)
 
@@ -90,7 +90,7 @@ def handle_PUT_SEED(c, request_message):
   if filename not in sol_file_list:
     #new solution size
     #broadcast this solution to every one
-    bc_message = message(PUT_SEED, data=data, data_size=size, IP=IP, hostname=server_hostname, Port=server_port)
+    bc_message = Message(PUT_SEED, data=data, data_size=size, IP=IP, hostname=server_hostname, Port=server_port)
     broadcast(bc_message.get_json())
 
 def handle_GET_SEED(c, decoded_message):
@@ -131,7 +131,7 @@ def handle_GET_SEED(c, decoded_message):
 
     # send PUT_SEED message
     size = int(math.sqrt(len(line)))
-    response_message = message(PUT_SEED, data=line, data_size=size, Id=client_id)
+    response_message = Message(PUT_SEED, data=line, data_size=size, Id=client_id)
     send_msg(c, response_message.get_json())
   else:
     send_msg(c, "no counterexample available")
@@ -140,7 +140,7 @@ def handle_GET_SEED(c, decoded_message):
 def handle_request(c, recv_message):
     # print '\nmessage =\n', message
     # print
-    decoded_message = message.decode(recv_message.strip())
+    decoded_message = Message.decode(recv_message.strip())
     # print '\decoded_message =\n', decoded_message
     # print
     

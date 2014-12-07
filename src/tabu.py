@@ -25,7 +25,7 @@
 # Modules
 #
 import copy
-import OrderedSet
+import ordered_set
 import pickle
 import random
 import sys
@@ -263,7 +263,7 @@ def _tabu(seed, numWorkers=1, maxSize=101):
         return
 
     # Create tabu list
-    tabuList = OrderedSet.OrderedSet()
+    tabuList = ordered_set.OrderedSet()
 
     # Start clock
     clockStart = time.clock()
